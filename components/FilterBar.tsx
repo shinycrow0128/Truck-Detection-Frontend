@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Camera, Truck } from "@/lib/supabase/types";
 import { ThemeToggle } from "./ThemeToggle";
+import { DateTimePicker } from "./DateTimePicker";
 
 /** Format Date for datetime-local input (uses local time, not UTC) */
 const toDateTimeLocal = (d: Date) => {
@@ -14,6 +15,12 @@ const toSupabaseTimestamp = (s: string) => {
   if (!s || s.length < 16) return s;
   const d = new Date(s);
   return isNaN(d.getTime()) ? s : d.toISOString();
+};
+/** Parse datetime-local string to Date */
+const parseDateTimeLocal = (s: string): Date | null => {
+  if (!s || s.length < 16) return null;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
 };
 
 type FilterBarProps = {
@@ -95,14 +102,6 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
     const v = e.target.value;
     setSelectedTruckId(v === "" ? null : v);
   };
-  const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value;
-    setStartDate(v);
-  };
-  const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = e.target.value;
-    setEndDate(v);
-  };
 
   useEffect(() => {
     if (!onFiltersChange) return;
@@ -181,20 +180,18 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
           ))}
         </select>
         <div className="ml-auto flex items-center gap-3">
-          <input
-            type="datetime-local"
-            aria-label="Start date and time"
+          <DateTimePicker
             value={startDate}
-            onChange={handleStartChange}
-            className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
+            onChange={setStartDate}
+            ariaLabel="Start date and time"
+            maxDate={parseDateTimeLocal(endDate) || undefined}
           />
           <span className="text-[var(--color-muted)]">→</span>
-          <input
-            type="datetime-local"
-            aria-label="End date and time"
+          <DateTimePicker
             value={endDate}
-            onChange={handleEndChange}
-            className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
+            onChange={setEndDate}
+            ariaLabel="End date and time"
+            minDate={parseDateTimeLocal(startDate) || undefined}
           />
           <ThemeToggle />
         </div>
