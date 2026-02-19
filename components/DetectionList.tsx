@@ -18,8 +18,8 @@ export function DetectionList({ detections }: DetectionListProps) {
   if (detections.length === 0) return null;
 
   return (
-    <main className="flex-1 max-w-6xl mx-auto px-4 py-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <main className="flex-1 w-full px-2 py-6">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {detections.map((d) => (
           <article
             key={d.id}
