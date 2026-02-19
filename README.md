@@ -46,7 +46,7 @@ Ensure Row Level Security (RLS) allows your anon key to `SELECT` from these tabl
 
 ## Features
 
-- **Filter bar** – “All Devices” (camera), “All” (status), and date range filters
+- **Filter bar** – “All Cameras” (camera), “All” (status), and date range filters
 - **Empty state** – “No Videos Yet” with data protection message and action buttons when there are no detections
 - **Detection list** – Grid of detection cards with video/image, timestamp, truck, camera, and status when data exists
 

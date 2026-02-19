@@ -8,7 +8,7 @@ import { EmptyState } from "./EmptyState";
 import { DetectionList } from "./DetectionList";
 
 type Filters = {
-  cameraId: string | null;
+  cameraIds: string[];
   status: string | null;
   start: string;
   end: string;
@@ -31,7 +31,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
-    cameraId: null,
+    cameraIds: [],
     status: null,
     start: defaultStart(),
     end: defaultEnd(),
@@ -60,7 +60,8 @@ export function Dashboard() {
         .order("detected_at", { ascending: false })
         .limit(50);
 
-      if (f.cameraId) q = q.eq("camera_id", f.cameraId);
+      if (f.cameraIds.length > 0) q = q.in("camera_id", f.cameraIds);
+      else q = q.in("camera_id", []); // no cameras selected → no videos
       if (f.status) q = q.eq("truck_status", f.status);
 
       const { data, error: e } = await q;
@@ -99,7 +100,7 @@ export function Dashboard() {
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-subtle)] transition-colors duration-300">
       <FilterBar cameras={cameras} onFiltersChange={handleFiltersChange} />
       {error && (
-        <div className="max-w-6xl mx-auto px-4 py-4 w-full">
+        <div className="w-full px-4 py-4">
           <p className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-4 py-2">
             {error}
           </p>
