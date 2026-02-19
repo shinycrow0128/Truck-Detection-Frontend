@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Camera, TruckDetection } from "@/lib/supabase/types";
+import type { Camera, Truck, TruckDetection } from "@/lib/supabase/types";
 import { FilterBar } from "./FilterBar";
 import { EmptyState } from "./EmptyState";
 import { DetectionList } from "./DetectionList";
 
 type Filters = {
   cameraIds: string[];
-  status: string | null;
+  truckId: string | null;
   start: string;
   end: string;
 };
@@ -27,12 +27,13 @@ const defaultEnd = () => {
 
 export function Dashboard() {
   const [cameras, setCameras] = useState<Camera[]>([]);
+  const [trucks, setTrucks] = useState<Truck[]>([]);
   const [detections, setDetections] = useState<TruckDetection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     cameraIds: [],
-    status: null,
+    truckId: null,
     start: defaultStart(),
     end: defaultEnd(),
   });
@@ -45,6 +46,16 @@ export function Dashboard() {
       .order("camera_name");
     if (e) throw e;
     setCameras((data as Camera[]) ?? []);
+  }, []);
+
+  const fetchTrucks = useCallback(async () => {
+    const supabase = createClient();
+    const { data, error: e } = await supabase
+      .from("truck")
+      .select("*")
+      .order("truck_name");
+    if (e) throw e;
+    setTrucks((data as Truck[]) ?? []);
   }, []);
 
   const fetchDetections = useCallback(
@@ -62,7 +73,7 @@ export function Dashboard() {
 
       if (f.cameraIds.length > 0) q = q.in("camera_id", f.cameraIds);
       else q = q.in("camera_id", []); // no cameras selected → no videos
-      if (f.status) q = q.eq("truck_status", f.status);
+      if (f.truckId) q = q.eq("truck_id", f.truckId);
 
       const { data, error: e } = await q;
       if (e) throw e;
@@ -77,7 +88,7 @@ export function Dashboard() {
       setLoading(true);
       setError(null);
       try {
-        await fetchCameras();
+        await Promise.all([fetchCameras(), fetchTrucks()]);
         if (cancelled) return;
         await fetchDetections(filters);
       } catch (e) {
@@ -90,7 +101,7 @@ export function Dashboard() {
     return () => {
       cancelled = true;
     };
-  }, [fetchCameras, fetchDetections, filters]);
+  }, [fetchCameras, fetchTrucks, fetchDetections, filters]);
 
   const handleFiltersChange = useCallback((f: Filters) => {
     setFilters(f);
@@ -98,7 +109,7 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-subtle)] transition-colors duration-300">
-      <FilterBar cameras={cameras} onFiltersChange={handleFiltersChange} />
+      <FilterBar cameras={cameras} trucks={trucks} onFiltersChange={handleFiltersChange} />
       {error && (
         <div className="w-full px-4 py-4">
           <p className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-4 py-2">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Camera } from "@/lib/supabase/types";
+import type { Camera, Truck } from "@/lib/supabase/types";
 import { ThemeToggle } from "./ThemeToggle";
 
 const toDateTimeLocal = (d: Date) => d.toISOString().slice(0, 16);
@@ -10,18 +10,19 @@ const toSupabaseTimestamp = (s: string) =>
 
 type FilterBarProps = {
   cameras: Camera[];
+  trucks: Truck[];
   onFiltersChange?: (filters: {
     cameraIds: string[];
-    status: string | null;
+    truckId: string | null;
     start: string;
     end: string;
   }) => void;
 };
 
-export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
+export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) {
   const userHasUncheckedAll = useRef(false);
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedTruckId, setSelectedTruckId] = useState<string | null>(null);
 
   const defaultStart = useMemo(() => {
     const d = new Date();
@@ -82,9 +83,9 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
     }
   }, [cameras]);
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTruckChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const v = e.target.value;
-    setSelectedStatus(v === "" ? null : v);
+    setSelectedTruckId(v === "" ? null : v);
   };
   const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
@@ -99,11 +100,11 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
     if (!onFiltersChange) return;
     onFiltersChange({
       cameraIds: selectedCameraIds,
-      status: selectedStatus,
+      truckId: selectedTruckId,
       start: toSupabaseTimestamp(startDate),
       end: toSupabaseTimestamp(endDate),
     });
-  }, [onFiltersChange, selectedCameraIds, selectedStatus, startDate, endDate]);
+  }, [onFiltersChange, selectedCameraIds, selectedTruckId, startDate, endDate]);
 
   return (
     <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
@@ -159,15 +160,17 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
           </div>
         </details>
         <select
-          aria-label="Filter by status"
-          value={selectedStatus ?? ""}
-          onChange={handleStatusChange}
+          aria-label="Filter by truck"
+          value={selectedTruckId ?? ""}
+          onChange={handleTruckChange}
           className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
         >
-          <option value="">All</option>
-          <option value="detected">Detected</option>
-          <option value="empty">Empty</option>
-          <option value="full">Full</option>
+          <option value="">All Trucks</option>
+          {trucks.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.truck_name ?? t.truck_number ?? t.id.slice(0, 8)}
+            </option>
+          ))}
         </select>
         <div className="ml-auto flex items-center gap-3">
           <input
