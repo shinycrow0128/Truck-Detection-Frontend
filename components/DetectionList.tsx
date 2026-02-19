@@ -19,7 +19,7 @@ export function DetectionList({ detections }: DetectionListProps) {
 
   return (
     <main className="flex-1 max-w-6xl mx-auto px-4 py-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {detections.map((d) => (
           <article
             key={d.id}
