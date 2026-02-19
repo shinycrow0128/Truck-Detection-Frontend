@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { Camera } from "@/lib/supabase/types";
+import { ThemeToggle } from "./ThemeToggle";
 
 const toDateTimeLocal = (d: Date) => d.toISOString().slice(0, 16);
 const toSupabaseTimestamp = (s: string) =>
@@ -65,13 +66,21 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
   };
 
   return (
-    <header className="bg-white border-b border-[var(--color-border)] px-4 py-3">
-      <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-3">
+    <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
+      <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--color-primary)] text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path d="M18 18.5a1.5 1.5 0 0 1-1.5-1.5 1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.5 1.5m1.5-9 1.96 1.96A9.458 9.458 0 0 1 21 13c0 5.03-4.03 9-9 9s-9-3.97-9-9c0-1.83.54-3.53 1.46-4.96L6 9.5A7.5 7.5 0 1 0 19.5 9.5h-2.25a1.25 1.25 0 0 1-1.25-1.25 1.25 1.25 0 0 1 1.25-1.25H19.5Z" />
+            </svg>
+          </div>
+          <h1 className="text-lg font-semibold text-[var(--color-text)] hidden sm:block">Truck Detection</h1>
+        </div>
         <select
           aria-label="Filter by device"
           value={selectedCameraId ?? ""}
           onChange={handleCameraChange}
-          className="px-3 py-2 border border-[var(--color-border)] rounded-md text-[var(--color-muted)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+          className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
         >
           <option value="">All Devices</option>
           {cameras.map((c) => (
@@ -84,20 +93,20 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
           aria-label="Filter by status"
           value={selectedStatus ?? ""}
           onChange={handleStatusChange}
-          className="px-3 py-2 border border-[var(--color-border)] rounded-md text-[var(--color-muted)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+          className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
         >
           <option value="">All</option>
           <option value="detected">Detected</option>
           <option value="empty">Empty</option>
           <option value="full">Full</option>
         </select>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
           <input
             type="datetime-local"
             aria-label="Start date and time"
             value={startDate}
             onChange={handleStartChange}
-            className="px-3 py-2 border border-[var(--color-border)] rounded-md text-[var(--color-muted)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
           />
           <span className="text-[var(--color-muted)]">→</span>
           <input
@@ -105,8 +114,9 @@ export function FilterBar({ cameras, onFiltersChange }: FilterBarProps) {
             aria-label="End date and time"
             value={endDate}
             onChange={handleEndChange}
-            className="px-3 py-2 border border-[var(--color-border)] rounded-md text-[var(--color-muted)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition-colors"
           />
+          <ThemeToggle />
         </div>
       </div>
     </header>

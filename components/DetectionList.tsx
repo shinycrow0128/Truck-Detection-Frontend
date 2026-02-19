@@ -23,9 +23,9 @@ export function DetectionList({ detections }: DetectionListProps) {
         {detections.map((d) => (
           <article
             key={d.id}
-            className="bg-white rounded-lg border border-[var(--color-border)] overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            className="bg-[var(--color-bg-elevated)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-[var(--color-shadow)] hover:shadow-[var(--color-shadow-lg)] transition-all duration-300 hover:-translate-y-0.5"
           >
-            <div className="aspect-video bg-gray-100 relative">
+            <div className="aspect-video bg-[var(--color-bg-hover)] relative">
               {d.video_url ? (
                 <video
                   src={d.video_url}
@@ -54,14 +54,14 @@ export function DetectionList({ detections }: DetectionListProps) {
               </div>
             </div>
             <div className="p-3">
-              <p className="text-sm font-medium text-gray-800">
+              <p className="text-sm font-medium text-[var(--color-text)]">
                 {d.truck?.truck_name ?? d.truck?.truck_number ?? "Truck"}
               </p>
-              <p className="text-xs text-[var(--color-muted)]">
+              <p className="text-xs text-[var(--color-text-secondary)]">
                 Camera: {d.camera?.camera_name ?? d.camera?.camera_location ?? d.camera_id.slice(0, 8)}
               </p>
               {d.bin_status && (
-                <p className="text-xs text-[var(--color-muted)] mt-1">
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                   Bin: {d.bin_status}
                 </p>
               )}

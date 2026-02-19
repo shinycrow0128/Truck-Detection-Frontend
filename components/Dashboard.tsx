@@ -96,18 +96,18 @@ export function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg-subtle)] transition-colors duration-300">
       <FilterBar cameras={cameras} onFiltersChange={handleFiltersChange} />
       {error && (
         <div className="max-w-6xl mx-auto px-4 py-4 w-full">
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md px-4 py-2">
+          <p className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-4 py-2">
             {error}
           </p>
         </div>
       )}
       {loading ? (
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-[var(--color-muted)]">Loading…</p>
+          <p className="text-[var(--color-text-secondary)]">Loading…</p>
         </main>
       ) : detections.length > 0 ? (
         <DetectionList detections={detections} />

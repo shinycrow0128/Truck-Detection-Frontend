@@ -1,17 +1,60 @@
 @import "tailwindcss";
 
-:root {
+/* Light theme (default) - white background, dark text */
+:root,
+[data-theme="light"] {
   --color-primary: #4a3afe;
   --color-primary-hover: #3d2ee8;
+  --color-primary-muted: rgba(74, 58, 254, 0.15);
   --color-muted: #6b7280;
   --color-muted-light: #9ca3af;
   --color-border: #e5e7eb;
-  --color-bg-subtle: #f9fafb;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-secondary: #475569;
   --color-decorative: #d6e8f6;
+  --color-shadow: rgba(0, 0, 0, 0.06);
+  --color-shadow-lg: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme - dark background, white text */
+[data-theme="dark"] {
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-muted: rgba(99, 102, 241, 0.2);
+  --color-muted: #94a3b8;
+  --color-muted-light: #64748b;
+  --color-border: #334155;
+  --color-bg: #0f172a;
+  --color-bg-subtle: #0f172a;
+  --color-bg-elevated: #1e293b;
+  --color-bg-hover: #334155;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-decorative: #1e3a5f;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-shadow-lg: rgba(0, 0, 0, 0.5);
+}
+
+/* Prevent flash - apply theme before paint */
+html {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
-  font-family: ui-sans-serif, system-ui, sans-serif, "Segoe UI", Roboto, sans-serif;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif, "Segoe UI", Roboto, sans-serif;
   background: var(--color-bg-subtle);
-  color: #374151;
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Improve datetime inputs in dark mode */
+[data-theme="dark"] input[type="datetime-local"] {
+  color-scheme: dark;
 }

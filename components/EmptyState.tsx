@@ -19,10 +19,10 @@ export function EmptyState() {
           aria-hidden
         />
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-3 relative">
+        <h1 className="text-2xl font-bold text-[var(--color-text)] mb-3 relative">
           No Videos Yet.
         </h1>
-        <p className="text-[var(--color-muted)] text-sm mb-6 relative">
+        <p className="text-[var(--color-text-secondary)] text-sm mb-6 relative">
           You have not set up an Advanced Data Protection code. It is recommended
           to upgrade.{" "}
           <a
@@ -35,14 +35,14 @@ export function EmptyState() {
         <div className="flex flex-col gap-3 relative">
           <a
             href="#"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-md text-white font-medium transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:opacity-90 hover:scale-[1.02]"
             style={{ background: "var(--color-primary)" }}
           >
             Turn On Data Protection &gt;
           </a>
           <a
             href="#"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-md font-medium border-2 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium border-2 transition-all duration-300 hover:bg-[var(--color-primary-muted)]"
             style={{
               borderColor: "var(--color-primary)",
               color: "var(--color-primary)",
