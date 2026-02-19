@@ -4,9 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Camera, Truck } from "@/lib/supabase/types";
 import { ThemeToggle } from "./ThemeToggle";
 
-const toDateTimeLocal = (d: Date) => d.toISOString().slice(0, 16);
-const toSupabaseTimestamp = (s: string) =>
-  s.length <= 16 ? `${s.replace("T", " ")}:00` : s;
+/** Format Date for datetime-local input (uses local time, not UTC) */
+const toDateTimeLocal = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+/** Convert datetime-local value (local time) to ISO UTC for Supabase */
+const toSupabaseTimestamp = (s: string) => {
+  if (!s || s.length < 16) return s;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? s : d.toISOString();
+};
 
 type FilterBarProps = {
   cameras: Camera[];

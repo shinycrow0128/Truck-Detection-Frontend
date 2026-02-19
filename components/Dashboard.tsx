@@ -17,13 +17,9 @@ type Filters = {
 const defaultStart = () => {
   const d = new Date();
   d.setMonth(d.getMonth() - 1);
-  const local = d.toISOString().slice(0, 16);
-  return `${local.replace("T", " ")}:00`;
+  return d.toISOString();
 };
-const defaultEnd = () => {
-  const local = new Date().toISOString().slice(0, 16);
-  return `${local.replace("T", " ")}:00`;
-};
+const defaultEnd = () => new Date().toISOString();
 
 export function Dashboard() {
   const [cameras, setCameras] = useState<Camera[]>([]);
