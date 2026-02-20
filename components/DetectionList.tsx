@@ -39,7 +39,7 @@ function VideoWithDuration({
     <video
       src={src}
       controls
-      className="w-full h-full object-cover"
+      className="w-full h-full object-contain"
       poster={poster}
       onLoadedMetadata={(e) => {
         const d = e.currentTarget.duration;
@@ -81,7 +81,7 @@ function DetectionCard({ detection: d }: { detection: TruckDetection }) {
           <img
             src={d.image_url}
             alt={`Detection ${d.id}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[var(--color-muted-light)] text-sm">

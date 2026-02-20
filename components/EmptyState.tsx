@@ -20,7 +20,7 @@ export function EmptyState() {
         />
 
         <h1 className="text-2xl font-bold text-[var(--color-text)] mb-3 relative">
-          No Videos Yet.
+          No Videos
         </h1>
         <p className="text-[var(--color-text-secondary)] text-sm mb-6 relative">
           You have not set up an Advanced Data Protection code. It is recommended
