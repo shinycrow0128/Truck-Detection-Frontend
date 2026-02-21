@@ -34,6 +34,31 @@ A Next.js 16 app that displays truck detection data, camera devices, and truck d
 
    Open [http://localhost:3000](http://localhost:3000).
 
+## Authentication
+
+Supabase email auth is enabled. Users sign up and sign in with email/password. Roles control navigation:
+
+- **Admin** – Dashboard, Truck Records, Manage Truck and Camera, Settings
+- **Client** – Dashboard, Truck Records only
+
+### Supabase Auth setup
+
+1. In Supabase Dashboard → Authentication → Providers, enable **Email**.
+2. (Optional) Configure email templates under Authentication → Email Templates.
+3. Run the profile migration to create the `profile` table and trigger:
+
+   ```bash
+   # From project root, if using Supabase CLI:
+   supabase db push
+   # Or run the SQL in supabase/migrations/20250220000001_create_profile.sql in the SQL Editor
+   ```
+
+4. To make a user an admin, run in Supabase SQL Editor:
+
+   ```sql
+   update public.profile set role = 'admin' where id = 'user-uuid';
+   ```
+
 ## Supabase schema
 
 The app expects these tables:
@@ -41,6 +66,7 @@ The app expects these tables:
 - **camera** – `id` (uuid), `camera_name`, `camera_info`, `camera_location`, `battery`, `data_used`, `created_at`, `updated_at`
 - **truck** – `id` (uuid), `truck_name`, `truck_number`, `truck_detail`, `created_at`, `updated_at`
 - **truck_detections** – `id` (int8), `camera_id` (FK → camera), `truck_id` (FK → truck), `bin_status`, `truck_status`, `detected_at`, `image_url`, `video_url`, `created_at`
+- **profile** – `id` (uuid, FK → auth.users), `role` (`'admin' | 'client'`), `created_at`, `updated_at`
 
 Ensure Row Level Security (RLS) allows your anon key to `SELECT` from these tables (or use a service role key server-side if you add API routes).
 

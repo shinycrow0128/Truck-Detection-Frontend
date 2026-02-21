@@ -18,6 +18,15 @@ export type Truck = {
   updated_at: string;
 };
 
+export type UserRole = "admin" | "client";
+
+export type Profile = {
+  id: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+};
+
 export type TruckDetection = {
   id: number;
   camera_id: string;
