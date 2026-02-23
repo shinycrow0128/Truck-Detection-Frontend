@@ -32,8 +32,13 @@ export function DateTimePicker({
   maxDate,
 }: DateTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const dateValue = parseDateTimeLocal(value);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleCalendarChange = (date: Date) => {
     onChange(toDateTimeLocal(date));
@@ -43,13 +48,15 @@ export function DateTimePicker({
     if (!val) return "";
     const d = parseDateTimeLocal(val);
     if (!d) return val;
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = months[d.getMonth()];
+    const day = d.getDate();
+    const year = d.getFullYear();
+    const hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const displayHour = hours % 12 || 12;
+    return `${month} ${day}, ${year}, ${String(displayHour).padStart(2, "0")}:${minutes} ${ampm}`;
   };
 
   // Close on outside click
@@ -74,7 +81,7 @@ export function DateTimePicker({
         aria-label={ariaLabel}
         className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors hover:bg-[var(--color-bg)] cursor-pointer min-w-[180px] text-left"
       >
-        {value ? formatDisplayValue(value) : "Select date & time"}
+        {hasMounted && value ? formatDisplayValue(value) : "Select date & time"}
       </button>
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 z-50">
