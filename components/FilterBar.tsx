@@ -38,6 +38,8 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
   const userHasUncheckedAll = useRef(false);
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
   const [selectedTruckId, setSelectedTruckId] = useState<string | null>(null);
+  const [cameraDropdownOpen, setCameraDropdownOpen] = useState(false);
+  const cameraDropdownRef = useRef<HTMLDivElement>(null);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -104,6 +106,22 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
     }
   }, [cameras]);
 
+  // Close camera dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        cameraDropdownRef.current &&
+        !cameraDropdownRef.current.contains(event.target as Node)
+      ) {
+        setCameraDropdownOpen(false);
+      }
+    };
+    if (cameraDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [cameraDropdownOpen]);
+
   const handleTruckChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const v = e.target.value;
     setSelectedTruckId(v === "" ? null : v);
@@ -130,10 +148,15 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
           </div>
           <h1 className="text-lg font-semibold text-[var(--color-text)] hidden sm:block">Truck Detection</h1>
         </div>
-        <details className="relative">
-          <summary className="list-none px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors cursor-pointer select-none">
+        <div ref={cameraDropdownRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setCameraDropdownOpen((prev) => !prev)}
+            className="list-none px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors cursor-pointer select-none"
+          >
             {selectedCameraSummary}
-          </summary>
+          </button>
+          {cameraDropdownOpen && (
           <div className="absolute z-10 mt-2 w-72 max-w-[80vw] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-lg p-2">
             <label className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer">
               <input
@@ -171,7 +194,8 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
               })}
             </div>
           </div>
-        </details>
+          )}
+        </div>
         <select
           aria-label="Filter by truck"
           value={selectedTruckId ?? ""}
