@@ -39,15 +39,21 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
   const [selectedTruckId, setSelectedTruckId] = useState<string | null>(null);
 
-  const defaultStart = useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 1);
-    return toDateTimeLocal(d);
-  }, []);
-  const defaultEnd = useMemo(() => toDateTimeLocal(new Date()), []);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-  const [startDate, setStartDate] = useState(defaultStart);
-  const [endDate, setEndDate] = useState(defaultEnd);
+  // Initialize date values only on the client to avoid hydration mismatch
+  useEffect(() => {
+    if (!mounted) {
+      const now = new Date();
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      setStartDate(toDateTimeLocal(oneMonthAgo));
+      setEndDate(toDateTimeLocal(now));
+      setMounted(true);
+    }
+  }, [mounted]);
 
   const cameraLabel = useCallback((c: Camera) => {
     const base = c.camera_name ?? c.camera_location ?? c.id.slice(0, 8);
