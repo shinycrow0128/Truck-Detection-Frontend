@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserRole } from "@/lib/supabase/types";
 
-const allNavItems = [
+const navItems = [
   {
     label: "Dashboard",
     href: "/",
@@ -28,7 +26,6 @@ const allNavItems = [
   {
     label: "Manage Truck and Camera",
     href: "/manage",
-    roles: ["admin"] as UserRole[],
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
         <path d="M12 9a3.75 3.75 0 1 0 0 7.5A3.75 3.75 0 0 0 12 9Z" />
@@ -39,7 +36,6 @@ const allNavItems = [
   {
     label: "Settings",
     href: "/settings",
-    roles: ["admin"] as UserRole[],
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
         <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567l-.178 1.071c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083l-1.02-.382a1.875 1.875 0 0 0-2.282.818l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c-.015.2.059.352.153.43l-.84.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.02-.382c.114-.043.282-.031.449.082.313.214.642.405.986.57.182.088.277.228.297.35l.178 1.07c.151.905.933 1.568 1.85 1.568h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.35.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.088-.277-.228-.297-.348l-.178-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clipRule="evenodd" />
@@ -50,13 +46,6 @@ const allNavItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { role, signOut } = useAuth();
-
-  const navItems = allNavItems.filter((item) => {
-    const roles = "roles" in item ? item.roles : undefined;
-    if (!roles) return true; // Dashboard, Truck Records - visible to all
-    return role && roles.includes(role);
-  });
 
   return (
     <aside className="w-64 shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
@@ -92,18 +81,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="p-3 border-t border-[var(--color-border)]">
-        <button
-          type="button"
-          onClick={() => signOut()}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text)] transition-all"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 shrink-0">
-            <path fillRule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-          </svg>
-          Sign out
-        </button>
-      </div>
     </aside>
   );
 }
