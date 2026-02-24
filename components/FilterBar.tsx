@@ -139,9 +139,11 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
   return (
     <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
       <div className="w-full flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-3">
-          
-          <h1 className="text-lg font-semibold text-[var(--color-text)] hidden sm:block">Truck Detection</h1>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-lg font-semibold text-[var(--color-text)]">Truck Records</h1>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            View Recorded Truck Detection Data
+          </p>
         </div>
         <div ref={cameraDropdownRef} className="relative">
           <button
