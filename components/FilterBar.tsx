@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Camera, Truck } from "@/lib/supabase/types";
-import { ThemeToggle } from "./ThemeToggle";
 import { DateTimePicker } from "./DateTimePicker";
 
 /** Format Date for datetime-local input (uses local time, not UTC) */
@@ -223,7 +222,6 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
             ariaLabel="End date and time"
             minDate={parseDateTimeLocal(startDate) || undefined}
           />
-          <ThemeToggle />
         </div>
       </div>
     </header>

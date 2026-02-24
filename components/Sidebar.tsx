@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
   {
@@ -51,14 +52,19 @@ export function Sidebar() {
     <aside className="w-64 shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
       <div className="p-6 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--color-primary)] text-white shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-              <path d="M4 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm10 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM4 15a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2Zm10 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2Z" />
-            </svg>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--color-primary)] text-white shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path d="M4 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm10 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM4 15a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2Zm10 0a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2Z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-[var(--color-text)]">Truck Monitor</h2>
+              <p className="text-xs text-[var(--color-text-secondary)]">RTSP TRACKING</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base font-semibold text-[var(--color-text)]">Truck Monitor</h2>
-            <p className="text-xs text-[var(--color-text-secondary)]">RTSP TRACKING</p>
+          <div className="ml-auto">
+            <ThemeToggle />
           </div>
         </div>
       </div>

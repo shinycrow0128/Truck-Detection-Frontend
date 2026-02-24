@@ -10,7 +10,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-      className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg-subtle)]"
+      className="flex items-center justify-center w-9 h-9 rounded-full bg-[var(--color-bg-elevated)]/80 border border-[var(--color-border)] text-[var(--color-text)] shadow-sm backdrop-blur-sm hover:bg-[var(--color-bg-hover)] hover:shadow-md hover:-translate-y-0.5 transition-transform transition-shadow transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg-subtle)]"
     >
       {theme === "light" ? (
         <svg
