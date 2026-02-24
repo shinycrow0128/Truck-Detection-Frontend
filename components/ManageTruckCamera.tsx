@@ -469,133 +469,149 @@ export function ManageTruckCamera() {
 
   if (loading) {
     return (
-      <main className="flex-1 flex items-center justify-center p-6">
-        <p className="text-[var(--color-text-secondary)]">Loading…</p>
-      </main>
+      <div className="flex-1 flex flex-col min-h-0">
+        <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
+          <div className="w-full flex flex-wrap items-center gap-4">
+            <h1 className="text-lg font-semibold text-[var(--color-text)]">Manage Truck and Camera</h1>
+          </div>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-6">
+          <p className="text-[var(--color-text-secondary)]">Loading…</p>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="flex-1 flex flex-col p-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-[var(--color-text)]">Manage Truck and Camera</h1>
-        <p className="text-sm text-[var(--color-text-secondary)] mt-1">Add, edit, and remove trucks and cameras.</p>
-      </div>
-
-      {error && (
-        <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
-          {error}
+    <div className="flex-1 flex flex-col min-h-0">
+      <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
+        <div className="w-full flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-lg font-semibold text-[var(--color-text)]">Manage Truck and Camera</h1>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Add, edit, and remove trucks and cameras.
+            </p>
+          </div>
         </div>
-      )}
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Trucks */}
-        <SectionCard
-          title="Trucks"
-          subtitle={`${trucks.length} truck(s)`}
-          action={
-            <button
-              type="button"
-              onClick={openAddTruck}
-              className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
-            >
-              Add Truck
-            </button>
-          }
-        >
-          {trucks.length === 0 ? (
-            <p className="text-[var(--color-text-secondary)] text-sm">No trucks yet. Add one to get started.</p>
-          ) : (
-            <ul className="space-y-2">
-              {trucks.map((t) => (
-                <li
-                  key={t.id}
-                  className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-[var(--color-text)] truncate">{truckLabel(t)}</p>
-                    {(t.truck_number || t.truck_detail) && (
-                      <p className="text-sm text-[var(--color-text-secondary)] truncate">
-                        {[t.truck_number, t.truck_detail].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => openEditTruck(t)}
-                      className="px-3 py-1.5 rounded-lg text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteConfirm({ type: "truck", id: t.id, label: truckLabel(t) })}
-                      className="px-3 py-1.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
+      <main className="flex-1 flex flex-col p-6">
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
+            {error}
+          </div>
+        )}
 
-        {/* Cameras */}
-        <SectionCard
-          title="Cameras"
-          subtitle={`${cameras.length} camera(s)`}
-          action={
-            <button
-              type="button"
-              onClick={openAddCamera}
-              className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
-            >
-              Add Camera
-            </button>
-          }
-        >
-          {cameras.length === 0 ? (
-            <p className="text-[var(--color-text-secondary)] text-sm">No cameras yet. Add one to get started.</p>
-          ) : (
-            <ul className="space-y-2">
-              {cameras.map((c) => (
-                <li
-                  key={c.id}
-                  className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-[var(--color-text)] truncate">{cameraLabel(c)}</p>
-                    {(c.camera_location || c.camera_info || c.battery != null) && (
-                      <p className="text-sm text-[var(--color-text-secondary)] truncate">
-                        {[c.camera_location, c.camera_info, c.battery != null ? `${c.battery}%` : null].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => openEditCamera(c)}
-                      className="px-3 py-1.5 rounded-lg text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteConfirm({ type: "camera", id: c.id, label: cameraLabel(c) })}
-                      className="px-3 py-1.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
-      </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Trucks */}
+          <SectionCard
+            title="Trucks"
+            subtitle={`${trucks.length} truck(s)`}
+            action={
+              <button
+                type="button"
+                onClick={openAddTruck}
+                className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+              >
+                Add Truck
+              </button>
+            }
+          >
+            {trucks.length === 0 ? (
+              <p className="text-[var(--color-text-secondary)] text-sm">No trucks yet. Add one to get started.</p>
+            ) : (
+              <ul className="space-y-2">
+                {trucks.map((t) => (
+                  <li
+                    key={t.id}
+                    className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-[var(--color-text)] truncate">{truckLabel(t)}</p>
+                      {(t.truck_number || t.truck_detail) && (
+                        <p className="text-sm text-[var(--color-text-secondary)] truncate">
+                          {[t.truck_number, t.truck_detail].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => openEditTruck(t)}
+                        className="px-3 py-1.5 rounded-lg text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirm({ type: "truck", id: t.id, label: truckLabel(t) })}
+                        className="px-3 py-1.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionCard>
 
+          {/* Cameras */}
+          <SectionCard
+            title="Cameras"
+            subtitle={`${cameras.length} camera(s)`}
+            action={
+              <button
+                type="button"
+                onClick={openAddCamera}
+                className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:bg-[var(--color-primary-hover)]"
+              >
+                Add Camera
+              </button>
+            }
+          >
+            {cameras.length === 0 ? (
+              <p className="text-[var(--color-text-secondary)] text-sm">No cameras yet. Add one to get started.</p>
+            ) : (
+              <ul className="space-y-2">
+                {cameras.map((c) => (
+                  <li
+                    key={c.id}
+                    className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-[var(--color-text)] truncate">{cameraLabel(c)}</p>
+                      {(c.camera_location || c.camera_info || c.battery != null) && (
+                        <p className="text-sm text-[var(--color-text-secondary)] truncate">
+                          {[c.camera_location, c.camera_info, c.battery != null ? `${c.battery}%` : null]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => openEditCamera(c)}
+                        className="px-3 py-1.5 rounded-lg text-sm text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)]"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirm({ type: "camera", id: c.id, label: cameraLabel(c) })}
+                        className="px-3 py-1.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionCard>
+        </div>
+      </main>
       {/* Truck modal */}
       <Modal
         open={truckModalOpen}
@@ -661,6 +677,6 @@ export function ManageTruckCamera() {
           </div>
         )}
       </Modal>
-    </main>
+    </div>
   );
 }
