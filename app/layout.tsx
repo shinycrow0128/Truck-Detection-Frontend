@@ -3,8 +3,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Truck Detection | Cloud Library",
-  description: "View truck detection data and camera device data",
+  title: "Accend | Truck Detection",
+  description: "View truck detection data and camera device data for Accend",
 };
 
 export default function RootLayout({

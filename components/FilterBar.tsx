@@ -140,11 +140,7 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
     <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
       <div className="w-full flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--color-primary)] text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-              <path d="M18 18.5a1.5 1.5 0 0 1-1.5-1.5 1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.5 1.5m1.5-9 1.96 1.96A9.458 9.458 0 0 1 21 13c0 5.03-4.03 9-9 9s-9-3.97-9-9c0-1.83.54-3.53 1.46-4.96L6 9.5A7.5 7.5 0 1 0 19.5 9.5h-2.25a1.25 1.25 0 0 1-1.25-1.25 1.25 1.25 0 0 1 1.25-1.25H19.5Z" />
-            </svg>
-          </div>
+          
           <h1 className="text-lg font-semibold text-[var(--color-text)] hidden sm:block">Truck Detection</h1>
         </div>
         <div ref={cameraDropdownRef} className="relative">
