@@ -75,7 +75,13 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
 
   const toggleCamera = (id: string) => {
     setSelectedCameraIds((prev) => {
-      return prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+
+      if (next.length === 0) {
+        userHasUncheckedAll.current = true;
+      }
+
+      return next;
     });
   };
 
