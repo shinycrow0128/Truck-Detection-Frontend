@@ -204,7 +204,7 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
             </option>
           ))}
         </select>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto mr-[150px] flex items-center gap-3">
           <DateTimePicker
             value={startDate}
             onChange={setStartDate}
