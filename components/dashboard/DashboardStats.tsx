@@ -36,24 +36,26 @@ export type DashboardData = {
   allBinStatuses: string[];
 };
 
-const RANGE_OPTIONS = [
-  { value: "1d", label: "Today" },
-  { value: "7d", label: "7 Days" },
-  { value: "30d", label: "30 Days" },
-  { value: "90d", label: "90 Days" },
-];
-
 export function DashboardStats() {
-  const [range, setRange] = useState("7d");
+  const [startDate, setStartDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [endDate, setEndDate] = useState<string>(() => {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  });
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStats = useCallback(async (selectedRange: string) => {
+  const fetchStats = useCallback(async (start: string, end: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/dashboard-stats?range=${selectedRange}`);
+      const params = new URLSearchParams({ start, end });
+      const res = await fetch(`/api/dashboard-stats?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch dashboard stats");
       const json = await res.json();
       if (json.error) throw new Error(json.error);
@@ -66,8 +68,21 @@ export function DashboardStats() {
   }, []);
 
   useEffect(() => {
-    fetchStats(range);
-  }, [range, fetchStats]);
+    if (!startDate || !endDate) return;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      start > end
+    ) {
+      return;
+    }
+
+    fetchStats(startDate, endDate);
+  }, [startDate, endDate, fetchStats]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -79,20 +94,49 @@ export function DashboardStats() {
               Truck detection analytics and insights
             </p>
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--color-bg-elevated)] border border-[var(--color-border)]">
-            {RANGE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setRange(opt.value)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                  range === opt.value
-                    ? "bg-[var(--color-primary)] text-white shadow-sm"
-                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)]"
-                }`}
+          <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-bg-elevated)]/95 via-[var(--color-bg-elevated)] to-[var(--color-bg-elevated)] px-3 py-2 shadow-sm">
+            <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                className="w-4 h-4"
               >
-                {opt.label}
-              </button>
-            ))}
+                <rect x="3.5" y="4.5" width="17" height="16" rx="2.5" />
+                <path d="M8 3v3.5M16 3v3.5" />
+                <path d="M3.5 10h17" />
+              </svg>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <input
+                  type="date"
+                  value={startDate}
+                  max={endDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="peer w-[9.5rem] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] shadow-[0_0_0_1px_rgba(255,255,255,0.02)] outline-none transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/40 hover:border-[var(--color-primary)]/60"
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[var(--color-text-secondary)] peer-focus:text-[var(--color-primary)]">
+                  ▼
+                </span>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="peer w-[9.5rem] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] shadow-[0_0_0_1px_rgba(255,255,255,0.02)] outline-none transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/40 hover:border-[var(--color-primary)]/60"
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[var(--color-text-secondary)] peer-focus:text-[var(--color-primary)]">
+                  ▼
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </header>

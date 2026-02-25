@@ -58,3 +58,22 @@ body {
 [data-theme="dark"] input[type="datetime-local"] {
   color-scheme: dark;
 }
+
+/* Beautiful, minimal date inputs */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+}
+
+/* Hide clear and spin buttons */
+input[type="date"]::-webkit-clear-button,
+input[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+
+/* Hide native calendar icon but keep clickable area */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}

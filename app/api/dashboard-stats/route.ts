@@ -5,25 +5,59 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { searchParams } = request.nextUrl;
   const range = searchParams.get("range") || "7d";
+  const startParam = searchParams.get("start");
+  const endParam = searchParams.get("end");
 
   // Calculate date range
-  const now = new Date();
+  let now = new Date();
   let startDate: Date;
-  switch (range) {
-    case "1d":
-      startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
-      break;
-    case "7d":
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      break;
-    case "30d":
-      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      break;
-    case "90d":
-      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-      break;
-    default:
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  if (startParam && endParam) {
+    const parsedStart = new Date(startParam);
+    const parsedEnd = new Date(endParam);
+
+    if (
+      !Number.isNaN(parsedStart.getTime()) &&
+      !Number.isNaN(parsedEnd.getTime()) &&
+      parsedStart <= parsedEnd
+    ) {
+      startDate = parsedStart;
+      now = parsedEnd;
+    } else {
+      switch (range) {
+        case "1d":
+          startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+          break;
+        case "7d":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "30d":
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case "90d":
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      }
+    }
+  } else {
+    switch (range) {
+      case "1d":
+        startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+        break;
+      case "7d":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "90d":
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    }
   }
 
   try {
