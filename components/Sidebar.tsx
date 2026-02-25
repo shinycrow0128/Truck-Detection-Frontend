@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navItems = [
@@ -47,6 +48,18 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore logout errors; we'll still navigate away.
+    } finally {
+      router.replace("/login");
+    }
+  };
 
   return (
     <aside className="w-64 shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
@@ -66,7 +79,9 @@ export function Sidebar() {
       </div>
       <nav className="flex-1 p-3 space-y-0.5" aria-label="Main navigation">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
@@ -83,6 +98,15 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="p-3 border-t border-[var(--color-border)]">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text)]"
+        >
+          Log out
+        </button>
+      </div>
     </aside>
   );
 }

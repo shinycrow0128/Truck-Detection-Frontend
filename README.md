@@ -26,6 +26,8 @@ A Next.js 16 app that displays truck detection data, camera devices, and truck d
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ```
 
+   Make sure **Email + Password** authentication is enabled in your Supabase project's **Authentication → Providers** settings.
+
 3. **Run the dev server**
 
    ```bash
@@ -47,6 +49,10 @@ Ensure Row Level Security (RLS) allows your anon key to `SELECT` from these tabl
 
 ## Features
 
+- **Authentication**
+  - `/login` – Email/password login and signup backed by Supabase Auth
+  - Protected dashboard routes under the `(dashboard)` group; unauthenticated users are redirected to `/login`
+  - Logout from the sidebar, which clears the Supabase session and returns to `/login`
 - **Filter bar** – “All Cameras” (camera), “All” (status), and date range filters
 - **Empty state** – “No Videos Yet” with data protection message and action buttons when there are no detections
 - **Detection list** – Grid of detection cards with video/image, timestamp, truck, camera, and status when data exists
