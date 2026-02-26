@@ -7,6 +7,8 @@ type KpiData = {
   totalTrucks: number;
   activeCameras: number;
   totalCameras: number;
+   emptyTrucksOut: number;
+   fullTrucksIn: number;
 };
 
 function KpiCard({
@@ -67,8 +69,8 @@ function KpiCard({
 export function KpiCards({ kpi, loading }: { kpi: KpiData; loading: boolean }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        {[...Array(6)].map((_, i) => (
           <div key={i} className="h-[120px] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] animate-pulse" />
         ))}
       </div>
@@ -76,7 +78,7 @@ export function KpiCards({ kpi, loading }: { kpi: KpiData; loading: boolean }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
       <KpiCard
         title="Total Detections"
         value={kpi.totalDetections}
@@ -124,6 +126,30 @@ export function KpiCards({ kpi, loading }: { kpi: KpiData; loading: boolean }) {
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
             <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+          </svg>
+        }
+      />
+      <KpiCard
+        title="Empty Trucks Out"
+        value={kpi.emptyTrucksOut}
+        subtitle="empty bin, outbound"
+        accentColor="#6366f1"
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <path d="M4.5 5.25A2.25 2.25 0 0 1 6.75 3h6a2.25 2.25 0 0 1 2.25 2.25V7.5h2.25a2.25 2.25 0 0 1 2.12 1.56l1.27 3.81a2.25 2.25 0 0 1-2.13 2.97H18v1.38A2.38 2.38 0 0 1 15.62 19.5H6.88A2.38 2.38 0 0 1 4.5 17.12V5.25Zm2.25-.75a.75.75 0 0 0-.75.75V7.5h7.5V5.25a.75.75 0 0 0-.75-.75h-6Z" />
+            <path d="M7.5 20.25a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM15 20.25a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+          </svg>
+        }
+      />
+      <KpiCard
+        title="Full Trucks On"
+        value={kpi.fullTrucksIn}
+        subtitle="full bin, inbound"
+        accentColor="#22c55e"
+        icon={
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <path d="M4.5 5.25A2.25 2.25 0 0 1 6.75 3h6a2.25 2.25 0 0 1 2.25 2.25V7.5h2.25a2.25 2.25 0 0 1 2.12 1.56l1.27 3.81a2.25 2.25 0 0 1-2.13 2.97H18v1.38A2.38 2.38 0 0 1 15.62 19.5H6.88A2.38 2.38 0 0 1 4.5 17.12V5.25Zm2.25 3a.75.75 0 0 0 0 1.5h5.25a.75.75 0 0 0 0-1.5H6.75Z" />
+            <path d="M7.5 20.25a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM15 20.25a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
           </svg>
         }
       />

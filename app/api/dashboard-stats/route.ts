@@ -115,9 +115,25 @@ export async function GET(request: NextRequest) {
 
     // Truck status counts
     const truckStatusMap: Record<string, number> = {};
+    let emptyTrucksOut = 0;
+    let fullTrucksIn = 0;
+
     for (const d of allDetections) {
       const status = d.truck_status || "unknown";
       truckStatusMap[status] = (truckStatusMap[status] || 0) + 1;
+
+      const binStatus = (d.bin_status || "").toLowerCase();
+      const truckStatus = (d.truck_status || "").toLowerCase();
+
+      // Empty trucks going out: bin is empty and truck marked as outgoing
+      if (binStatus === "empty" && truckStatus === "outgoing") {
+        emptyTrucksOut++;
+      }
+
+      // Full trucks coming in: bin is full and truck marked as incoming
+      if (binStatus === "full" && truckStatus === "incoming") {
+        fullTrucksIn++;
+      }
     }
 
     // --- Daily detection trend ---
@@ -222,6 +238,8 @@ export async function GET(request: NextRequest) {
         totalTrucks: trucks?.length ?? 0,
         activeCameras,
         totalCameras: cameras?.length ?? 0,
+        emptyTrucksOut,
+        fullTrucksIn,
       },
       dailyTrend,
       hourlyDistribution,

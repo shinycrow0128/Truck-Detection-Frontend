@@ -18,6 +18,8 @@ export type DashboardData = {
     totalTrucks: number;
     activeCameras: number;
     totalCameras: number;
+    emptyTrucksOut: number;
+    fullTrucksIn: number;
   };
   dailyTrend: Array<{ date: string; total: number; [key: string]: string | number }>;
   hourlyDistribution: Array<{ hour: string; detections: number }>;
