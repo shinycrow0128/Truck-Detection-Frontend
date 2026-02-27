@@ -132,7 +132,7 @@ export function KpiCards({ kpi, loading }: { kpi: KpiData; loading: boolean }) {
       <KpiCard
         title="Empty Trucks Out"
         value={kpi.emptyTrucksOut}
-        subtitle="empty bin, outbound"
+        subtitle="Empty Truck Bin, Outgoing"
         accentColor="#6366f1"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -144,7 +144,7 @@ export function KpiCards({ kpi, loading }: { kpi: KpiData; loading: boolean }) {
       <KpiCard
         title="Full Trucks On"
         value={kpi.fullTrucksIn}
-        subtitle="full bin, inbound"
+        subtitle="Full Truck Bin, Incoming"
         accentColor="#22c55e"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
