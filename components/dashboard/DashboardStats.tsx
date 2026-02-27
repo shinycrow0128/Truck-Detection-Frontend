@@ -36,6 +36,14 @@ export type DashboardData = {
     camera_name: string;
   }>;
   allBinStatuses: string[];
+  detectionsForExport: Array<{
+    id: string;
+    detected_at: string;
+    bin_status: string | null;
+    truck_status: string | null;
+    truck_name: string;
+    camera_name: string;
+  }>;
 };
 
 export function DashboardStats() {
@@ -51,6 +59,68 @@ export function DashboardStats() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleExportCsv = useCallback(() => {
+    if (!data) return;
+
+    const lines: string[] = [];
+
+    const escape = (value: string | number | null | undefined) => {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      if (/[",\n]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const formatFileDate = (value: string) => {
+      return value.replace(/-/g, "_");
+    };
+
+    // Header row
+    lines.push(
+      ["No", "Camera Name", "Truck Name", "Bin Status", "Truck Status", "Detected At"]
+        .map(escape)
+        .join(",")
+    );
+
+    // All detections in selected period, sorted by detected_at ascending
+    const sortedDetections = [...data.detectionsForExport].sort(
+      (a, b) =>
+        new Date(a.detected_at).getTime() - new Date(b.detected_at).getTime()
+    );
+
+    sortedDetections.forEach((row, index) => {
+      lines.push(
+        [
+          index + 1,
+          row.camera_name,
+          row.truck_name,
+          row.bin_status,
+          row.truck_status,
+          new Date(row.detected_at).toISOString(),
+        ]
+          .map(escape)
+          .join(",")
+      );
+    });
+
+    const csv = lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const startPart = formatFileDate(startDate);
+    const endPart = formatFileDate(endDate);
+    const fileLabel =
+      startDate === endDate ? startPart : `${startPart}-${endPart}`;
+    link.href = url;
+    link.download = `truck_detections_${fileLabel}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [data, startDate, endDate]);
 
   const fetchStats = useCallback(async (start: string, end: string) => {
     setLoading(true);
@@ -138,6 +208,15 @@ export function DashboardStats() {
                   ▼
                 </span>
               </div>
+
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={!data || loading}
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-primary)]/70 bg-[var(--color-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] shadow-sm transition-colors hover:bg-[var(--color-primary)]/10 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <span>Export CSV</span>
+              </button>
             </div>
           </div>
         </div>

@@ -230,6 +230,16 @@ export async function GET(request: NextRequest) {
       camera_name: (d.camera as { camera_name?: string } | null)?.camera_name || "Unknown",
     }));
 
+    // --- All detections for export (already sorted by detected_at ascending) ---
+    const detectionsForExport = allDetections.map((d) => ({
+      id: d.id,
+      detected_at: d.detected_at,
+      bin_status: d.bin_status,
+      truck_status: d.truck_status,
+      truck_name: (d.truck as { truck_name?: string } | null)?.truck_name || "Unknown",
+      camera_name: (d.camera as { camera_name?: string } | null)?.camera_name || "Unknown",
+    }));
+
     return NextResponse.json({
       kpi: {
         totalDetections,
@@ -248,6 +258,7 @@ export async function GET(request: NextRequest) {
       binStatusDistribution,
       truckStatusDistribution,
       recentDetections,
+      detectionsForExport,
       allBinStatuses: [...new Set(allDetections.map((d) => d.bin_status || "unknown"))],
     });
   } catch (error) {
