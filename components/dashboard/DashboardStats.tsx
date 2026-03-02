@@ -9,6 +9,7 @@ import { TruckStatusChart } from "@/components/dashboard/TruckStatusChart";
 import { TruckBreakdownTable } from "@/components/dashboard/TruckBreakdownTable";
 import { CameraBreakdownTable } from "@/components/dashboard/CameraBreakdownTable";
 import { RecentDetections } from "@/components/dashboard/RecentDetections";
+import { AccendLoader } from "@/components/AccendLoader";
 
 export type DashboardData = {
   kpi: {
@@ -233,16 +234,6 @@ export function DashboardStats() {
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && !data && (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-[var(--color-text-secondary)]">Loading analytics...</p>
-            </div>
-          </div>
-        )}
-
         {/* Dashboard Content */}
         {data && (
           <div className="flex flex-col gap-6">
@@ -272,6 +263,9 @@ export function DashboardStats() {
             {/* Recent Detections */}
             <RecentDetections data={data.recentDetections} loading={loading} />
           </div>
+        )}
+        {loading && !data && (
+          <AccendLoader label="Loading analytics…" />
         )}
       </main>
     </div>

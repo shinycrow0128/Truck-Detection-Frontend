@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "./ThemeToggle";
 import type { UserRole } from "@/lib/supabase/types";
+import { AccendLoader } from "./AccendLoader";
 
 const navItems = [
   {
@@ -53,6 +54,7 @@ export function Sidebar() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -83,6 +85,7 @@ export function Sidebar() {
   }, []);
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
@@ -94,6 +97,10 @@ export function Sidebar() {
   };
 
   return (
+    <>
+    {loggingOut && (
+      <AccendLoader label="Signing you out…" />
+    )}
     <aside className="w-64 shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
       <div className="p-6 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
@@ -135,27 +142,47 @@ export function Sidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-2 flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text)] transition-all duration-200"
+          disabled={loggingOut}
+          className="mt-2 flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text)] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-5 h-5 shrink-0"
-          >
-            <path d="M15.75 3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0V4.5h-6v15h6v-2.25a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75h-7.5A1.75 1.75 0 0 1 6.5 19.25v-14.5A1.75 1.75 0 0 1 8.25 3h7.5Z" />
-            <path d="M18.53 8.47a.75.75 0 0 0-1.06 1.06L19.19 11.25H11.5a.75.75 0 0 0 0 1.5h7.69l-1.72 1.72a.75.75 0 1 0 1.06 1.06l3.25-3.25a.75.75 0 0 0 0-1.06l-3.25-3.25Z" />
-          </svg>
-          <div className="flex flex-col items-start">
-            <span>Log out</span>
-            {userEmail && (
-              <span className="text-xs text-[var(--color-text-secondary)]">
-                {userEmail}
+          {loggingOut ? (
+            <>
+              <span className="inline-flex h-4 w-4 items-center justify-center">
+                <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
               </span>
-            )}
-          </div>
+              <div className="flex flex-col items-start">
+                <span>Logging out…</span>
+                {userEmail && (
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    {userEmail}
+                  </span>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5 shrink-0"
+              >
+                <path d="M15.75 3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0V4.5h-6v15h6v-2.25a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75h-7.5A1.75 1.75 0 0 1 6.5 19.25v-14.5A1.75 1.75 0 0 1 8.25 3h7.5Z" />
+                <path d="M18.53 8.47a.75.75 0 0 0-1.06 1.06L19.19 11.25H11.5a.75.75 0 0 0 0 1.5h7.69l-1.72 1.72a.75.75 0 1 0 1.06 1.06l3.25-3.25a.75.75 0 0 0 0-1.06l-3.25-3.25Z" />
+              </svg>
+              <div className="flex flex-col items-start">
+                <span>Log out</span>
+                {userEmail && (
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    {userEmail}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
         </button>
       </nav>
     </aside>
+    </>
   );
 }

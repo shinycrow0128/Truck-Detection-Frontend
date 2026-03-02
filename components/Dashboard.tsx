@@ -6,6 +6,7 @@ import type { Camera, Truck, TruckDetection } from "@/lib/supabase/types";
 import { FilterBar } from "./FilterBar";
 import { EmptyState } from "./EmptyState";
 import { DetectionList } from "./DetectionList";
+import { AccendLoader } from "./AccendLoader";
 
 type Filters = {
   cameraIds: string[];
@@ -113,14 +114,13 @@ export function Dashboard() {
           </p>
         </div>
       )}
-      {loading ? (
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-[var(--color-text-secondary)]">Loading…</p>
-        </main>
-      ) : detections.length > 0 ? (
+      {detections.length > 0 ? (
         <DetectionList detections={detections} />
       ) : (
         <EmptyState />
+      )}
+      {loading && (
+        <AccendLoader label="Loading detections…" />
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Camera, Truck } from "@/lib/supabase/types";
+import { AccendLoader } from "./AccendLoader";
 
 // ─── Truck form values ───────────────────────────────────────────────────────
 type TruckFormValues = {
@@ -467,21 +468,6 @@ export function ManageTruckCamera() {
   const truckLabel = (t: Truck) => t.truck_name ?? t.truck_number ?? t.id.slice(0, 8);
   const cameraLabel = (c: Camera) => c.camera_name ?? c.camera_location ?? c.id.slice(0, 8);
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex flex-col min-h-0">
-        <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
-          <div className="w-full flex flex-wrap items-center gap-4">
-            <h1 className="text-lg font-semibold text-[var(--color-text)]">Manage Truck and Camera</h1>
-          </div>
-        </header>
-        <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-[var(--color-text-secondary)]">Loading…</p>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
@@ -677,6 +663,7 @@ export function ManageTruckCamera() {
           </div>
         )}
       </Modal>
+      {loading && <AccendLoader label="Loading trucks and cameras…" />}
     </div>
   );
 }

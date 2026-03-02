@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AccendLoader } from "@/components/AccendLoader";
 
 type AuthMode = "login" | "signup";
 
@@ -76,90 +77,103 @@ export default function LoginPage() {
       : "Already have an account? Log in";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-subtle)] transition-colors duration-300">
-      <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-lg p-8 space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-xl font-semibold text-[var(--color-text)]">
-            {title} to Truck Monitor
-          </h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            Use your email and password to{" "}
-            {mode === "login" ? "access" : "create"} your account.
-          </p>
-        </div>
-
-        {error && (
-          <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300">
-            {error}
+    <>
+      {loading && (
+        <AccendLoader
+          label={
+            mode === "login"
+              ? "Signing you in…"
+              : "Creating your account…"
+          }
+        />
+      )}
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-subtle)] transition-colors duration-300">
+        <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-lg p-8 space-y-6">
+          <div className="space-y-2 text-center">
+            <h1 className="text-xl font-semibold text-[var(--color-text)]">
+              {title} to Truck Monitor
+            </h1>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              Use your email and password to{" "}
+              {mode === "login" ? "access" : "create"} your account.
+            </p>
           </div>
-        )}
 
-        {message && (
-          <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
-            {message}
-          </div>
-        )}
+          {error && (
+            <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-[var(--color-text)]"
+          {message && (
+            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[var(--color-text)]"
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[var(--color-text)]"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                autoComplete={
+                  mode === "login" ? "current-password" : "new-password"
+                }
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                placeholder="Enter a secure password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-60"
             >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-[var(--color-text)]"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-              placeholder="Enter a secure password"
-            />
-          </div>
+              {title}
+            </button>
+          </form>
 
           <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-60"
+            type="button"
+            onClick={() => {
+              setError(null);
+              setMessage(null);
+              setMode((prev) => (prev === "login" ? "signup" : "login"));
+            }}
+            className="w-full text-center text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
           >
-            {loading ? "Please wait…" : title}
+            {toggleLabel}
           </button>
-        </form>
-
-        <button
-          type="button"
-          onClick={() => {
-            setError(null);
-            setMessage(null);
-            setMode((prev) => (prev === "login" ? "signup" : "login"));
-          }}
-          className="w-full text-center text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
-        >
-          {toggleLabel}
-        </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
