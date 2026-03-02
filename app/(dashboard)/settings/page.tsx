@@ -11,6 +11,9 @@ type ProfileRow = Profile & {
 
 export default async function SettingsPage() {
   const supabase = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
   const { data: profiles } = await supabase.from("profile").select("*");
 
   const safeProfiles = ((profiles ?? []) as ProfileRow[]).filter((p) => p && typeof p.id === "string");
@@ -48,7 +51,10 @@ export default async function SettingsPage() {
             <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
               Manage which role is assigned to each user in the system.
             </p>
-            <UserAccessRightsTable initialProfiles={profilesWithEmail} />
+            <UserAccessRightsTable
+              initialProfiles={profilesWithEmail}
+              currentUserId={currentUser?.id ?? null}
+            />
           </div>
         </section>
       </main>

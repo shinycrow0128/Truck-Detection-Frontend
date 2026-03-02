@@ -12,6 +12,8 @@ type ProfileRow = Profile & {
 
 type Props = {
   initialProfiles: ProfileRow[];
+  /** ID of the currently logged-in user; their row is read-only */
+  currentUserId: string | null;
 };
 
 function roleLabel(role: UserRole) {
@@ -46,7 +48,7 @@ function emailTag(email?: string | null) {
   );
 }
 
-export function UserAccessRightsTable({ initialProfiles }: Props) {
+export function UserAccessRightsTable({ initialProfiles, currentUserId }: Props) {
   const [profiles, setProfiles] = useState<ProfileRow[]>(initialProfiles);
   const [draftRoles, setDraftRoles] = useState<Record<string, UserRole>>({});
   const [savingIds, setSavingIds] = useState<Record<string, boolean>>({});
@@ -121,6 +123,7 @@ export function UserAccessRightsTable({ initialProfiles }: Props) {
             </tr>
           ) : (
             rows.map((p, i) => {
+              const isCurrentUser = currentUserId !== null && p.id === currentUserId;
               const draft = draftRoles[p.id];
               const effectiveRole = draft ?? p.role;
               const dirty = draft != null && draft !== p.role;
@@ -134,7 +137,7 @@ export function UserAccessRightsTable({ initialProfiles }: Props) {
                   key={p.id}
                   className={`transition-colors hover:bg-[var(--color-bg-hover)] ${
                     i < rows.length - 1 ? "border-b border-[var(--color-border)]" : ""
-                  }`}
+                  } ${isCurrentUser ? "bg-[var(--color-bg-hover)]/50" : ""}`}
                 >
                   <td className="py-2.5 px-3 text-sm">
                     <div className="flex flex-col">
@@ -154,26 +157,39 @@ export function UserAccessRightsTable({ initialProfiles }: Props) {
                     )}
                   </td>
                   <td className="py-2.5 px-3">
-                    <select
-                      value={effectiveRole}
-                      onChange={(e) => onChangeRole(p.id, e.target.value)}
-                      className="w-full max-w-[220px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
-                      disabled={saving}
-                      aria-label={`Access right for ${userText}`}
-                    >
-                      <option value="admin">{roleLabel("admin")}</option>
-                      <option value="client">{roleLabel("client")}</option>
-                    </select>
+                    {isCurrentUser ? (
+                      <span
+                        className="inline-flex items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text-secondary)]"
+                        aria-label={`Access right for ${userText} (current user, read-only)`}
+                      >
+                        {roleLabel(p.role)}
+                      </span>
+                    ) : (
+                      <select
+                        value={effectiveRole}
+                        onChange={(e) => onChangeRole(p.id, e.target.value)}
+                        className="w-full max-w-[220px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
+                        disabled={saving}
+                        aria-label={`Access right for ${userText}`}
+                      >
+                        <option value="admin">{roleLabel("admin")}</option>
+                        <option value="client">{roleLabel("client")}</option>
+                      </select>
+                    )}
                   </td>
                   <td className="py-2.5 px-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onSave(p.id)}
-                      disabled={!dirty || saving}
-                      className="inline-flex items-center justify-center rounded-lg bg-[var(--color-primary)] px-3 py-2 text-sm font-medium text-white shadow-sm transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {saving ? "Saving…" : "Save"}
-                    </button>
+                    {isCurrentUser ? (
+                      <span className="text-xs text-[var(--color-text-secondary)]">(you)</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onSave(p.id)}
+                        disabled={!dirty || saving}
+                        className="inline-flex items-center justify-center rounded-lg bg-[var(--color-primary)] px-3 py-2 text-sm font-medium text-white shadow-sm transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {saving ? "Saving…" : "Save"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               );
