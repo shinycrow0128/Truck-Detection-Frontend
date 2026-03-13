@@ -39,6 +39,21 @@ const navItems = [
   //   ),
   // },
   {
+    label: "Video Records",
+    href: "/video-records",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-5 h-5 shrink-0"
+      >
+        <path d="M4.5 5.25A2.25 2.25 0 0 1 6.75 3h7.5A2.25 2.25 0 0 1 16.5 5.25v13.5A2.25 2.25 0 0 1 14.25 21h-7.5A2.25 2.25 0 0 1 4.5 18.75V5.25Z" />
+        <path d="M18.53 7.47a.75.75 0 0 1 1.06 0l2.25 2.25A2.25 2.25 0 0 1 22.5 11.318v1.364a2.25 2.25 0 0 1-.66 1.598l-2.25 2.25a.75.75 0 0 1-1.28-.53V8a.75.75 0 0 1 .22-.53Z" />
+      </svg>
+    ),
+  },
+  {
     label: "Settings",
     href: "/settings",
     icon: (
