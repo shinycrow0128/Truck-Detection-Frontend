@@ -9,9 +9,19 @@ type VideoItem = {
 
 const VIDEO_BASE_URL = process.env.NEXT_PUBLIC_VIDEO_BASE_URL ?? "";
 
+type SortOrder = "recent" | "old";
+
+function sortVideoItems(items: VideoItem[], order: SortOrder) {
+  const sorted = [...items].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+  );
+  return order === "recent" ? sorted.reverse() : sorted;
+}
+
 export default function VideoRecordsPage() {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -153,8 +163,32 @@ export default function VideoRecordsPage() {
       )}
 
       {videos.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {videos.map((video) => (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              Showing {videos.length} video{videos.length === 1 ? "" : "s"}
+            </p>
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="video-sort"
+                className="text-xs font-medium text-[var(--color-text-secondary)]"
+              >
+                Sort
+              </label>
+              <select
+                id="video-sort"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+                className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+              >
+                <option value="recent">Most Recent</option>
+                <option value="old">Start of Day</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {sortVideoItems(videos, sortOrder).map((video) => (
             <div
               key={video.url}
               className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] overflow-hidden flex flex-col"
@@ -181,6 +215,7 @@ export default function VideoRecordsPage() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
     </div>
