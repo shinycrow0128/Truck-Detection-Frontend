@@ -8,9 +8,17 @@ type CalendarProps = {
   onClose: () => void;
   minDate?: Date;
   maxDate?: Date;
+  showTime?: boolean;
 };
 
-export function Calendar({ value, onChange, onClose, minDate, maxDate }: CalendarProps) {
+export function Calendar({
+  value,
+  onChange,
+  onClose,
+  minDate,
+  maxDate,
+  showTime = true,
+}: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(value);
   const [selectedTime, setSelectedTime] = useState<{ hours: number; minutes: number }>(
@@ -108,8 +116,12 @@ export function Calendar({ value, onChange, onClose, minDate, maxDate }: Calenda
   const handleConfirm = () => {
     if (selectedDate) {
       const finalDate = new Date(selectedDate);
-      finalDate.setHours(selectedTime.hours);
-      finalDate.setMinutes(selectedTime.minutes);
+      if (showTime) {
+        finalDate.setHours(selectedTime.hours);
+        finalDate.setMinutes(selectedTime.minutes);
+      } else {
+        finalDate.setHours(0, 0, 0, 0);
+      }
       onChange(finalDate);
       onClose();
     }
@@ -119,7 +131,11 @@ export function Calendar({ value, onChange, onClose, minDate, maxDate }: Calenda
     const today = new Date();
     setSelectedDate(today);
     setCurrentMonth(today);
-    setSelectedTime({ hours: today.getHours(), minutes: today.getMinutes() });
+    if (showTime) {
+      setSelectedTime({ hours: today.getHours(), minutes: today.getMinutes() });
+    } else {
+      setSelectedTime({ hours: 0, minutes: 0 });
+    }
   };
 
   return (
@@ -199,46 +215,48 @@ export function Calendar({ value, onChange, onClose, minDate, maxDate }: Calenda
           </div>
 
           {/* Time Selection */}
-          <div className="mb-4 p-3 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]">
-            <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">
-              Time
-            </label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="block text-xs text-[var(--color-text-secondary)] mb-1">H</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="23"
-                  value={selectedTime.hours}
-                  onChange={(e) =>
-                    setSelectedTime({
-                      ...selectedTime,
-                      hours: Math.max(0, Math.min(23, parseInt(e.target.value) || 0)),
-                    })
-                  }
-                  className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
-              </div>
-              <span className="text-lg font-bold text-[var(--color-text-secondary)] mt-5">:</span>
-              <div className="flex-1">
-                <label className="block text-xs text-[var(--color-text-secondary)] mb-1">M</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  value={selectedTime.minutes}
-                  onChange={(e) =>
-                    setSelectedTime({
-                      ...selectedTime,
-                      minutes: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)),
-                    })
-                  }
-                  className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                />
+          {showTime && (
+            <div className="mb-4 p-3 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]">
+              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-2">
+                Time
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs text-[var(--color-text-secondary)] mb-1">H</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={selectedTime.hours}
+                    onChange={(e) =>
+                      setSelectedTime({
+                        ...selectedTime,
+                        hours: Math.max(0, Math.min(23, parseInt(e.target.value) || 0)),
+                      })
+                    }
+                    className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  />
+                </div>
+                <span className="text-lg font-bold text-[var(--color-text-secondary)] mt-5">:</span>
+                <div className="flex-1">
+                  <label className="block text-xs text-[var(--color-text-secondary)] mb-1">M</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={selectedTime.minutes}
+                    onChange={(e) =>
+                      setSelectedTime({
+                        ...selectedTime,
+                        minutes: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)),
+                      })
+                    }
+                    className="w-full px-2 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-center text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">

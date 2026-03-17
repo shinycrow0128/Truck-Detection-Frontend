@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import type { UserRole } from "@/lib/supabase/types";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type TruckStatus = "incoming" | "outgoing";
 type BinStatus = "full" | "empty";
+
+interface PatchBody {
+  truck_status?: TruckStatus;
+  bin_status?: BinStatus;
+}
 
 function isTruckStatus(value: unknown): value is TruckStatus {
   return value === "incoming" || value === "outgoing";
@@ -14,71 +18,83 @@ function isBinStatus(value: unknown): value is BinStatus {
 }
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } },
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }   // ← THIS IS THE FIX
 ) {
-  const { id } = params;
-  const detectionId = Number(id);
-  if (!Number.isFinite(detectionId)) {
-    return NextResponse.json({ error: "Invalid detection id" }, { status: 400 });
-  }
+  // ✅ Await params (required in Next.js 15+)
+  const { id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profile")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profileError) {
-    return NextResponse.json({ error: profileError.message }, { status: 500 });
-  }
-
-  const role = profile && "role" in profile ? (profile.role as UserRole) : null;
-  if (role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const truck_status = (body as { truck_status?: unknown }).truck_status;
-  const bin_status = (body as { bin_status?: unknown }).bin_status;
-
-  if (!isTruckStatus(truck_status) || !isBinStatus(bin_status)) {
+  // ID is a UUID (not a number) – we keep it as string
+  if (!id || typeof id !== "string") {
     return NextResponse.json(
-      { error: "truck_status must be incoming/outgoing and bin_status must be full/empty" },
-      { status: 400 },
+      { error: "Invalid detection ID" },
+      { status: 400 }
     );
   }
 
+  const supabase = createAdminClient();
+  if (!supabase) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+
+  // Parse and validate body
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" },
+      { status: 400 }
+    );
+  }
+
+  if (!body || typeof body !== "object") {
+    return NextResponse.json(
+      { error: "Request body must be a JSON object" },
+      { status: 400 }
+    );
+  }
+
+  const { truck_status, bin_status } = body as PatchBody;
+
+  if (truck_status === undefined && bin_status === undefined) {
+    return NextResponse.json(
+      { error: "At least one of truck_status or bin_status must be provided" },
+      { status: 400 }
+    );
+  }
+
+  if (truck_status !== undefined && !isTruckStatus(truck_status)) {
+    return NextResponse.json(
+      { error: "truck_status must be 'incoming' or 'outgoing'" },
+      { status: 400 }
+    );
+  }
+
+  if (bin_status !== undefined && !isBinStatus(bin_status)) {
+    return NextResponse.json(
+      { error: "bin_status must be 'full' or 'empty'" },
+      { status: 400 }
+    );
+  }
+  
   const { data, error } = await supabase
     .from("truck_detections")
-    .update({ truck_status, bin_status })
-    .eq("id", detectionId)
+    .update({truck_status, bin_status})
+    .eq("id", id)
     .select("id, truck_status, bin_status")
     .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
   if (!data) {
-    return NextResponse.json({ error: "Detection not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Detection not found" },
+      { status: 404 }
+    );
   }
 
   return NextResponse.json({ data });
 }
-

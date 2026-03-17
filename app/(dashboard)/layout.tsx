@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/Sidebar";
+import { DashboardShell } from "@/components/DashboardShell";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
@@ -17,10 +17,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen flex bg-[var(--color-bg-subtle)] transition-colors duration-300">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">{children}</div>
-    </div>
+    <DashboardShell>{children}</DashboardShell>
   );
 }
 

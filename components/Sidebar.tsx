@@ -64,7 +64,7 @@ const navItems = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -107,6 +107,7 @@ export function Sidebar() {
     } catch {
       // Ignore logout errors; we'll still navigate away.
     } finally {
+      onNavigate?.();
       router.replace("/login");
     }
   };
@@ -116,7 +117,7 @@ export function Sidebar() {
     {loggingOut && (
       <AccendLoader label="Signing you out…" />
     )}
-    <aside className="w-64 shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
+    <aside className="w-64 h-full shrink-0 bg-[var(--color-bg-elevated)] border-r border-[var(--color-border)] flex flex-col transition-colors duration-300">
       <div className="p-6 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
@@ -142,6 +143,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => onNavigate?.()}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-[var(--color-primary)] text-white"

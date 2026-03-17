@@ -144,18 +144,18 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
 
   return (
     <header className="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)] px-4 py-4 shadow-sm transition-colors duration-300">
-      <div className="w-full flex flex-wrap items-center gap-4">
+      <div className="w-full flex flex-wrap items-end gap-3 sm:gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-lg font-semibold text-[var(--color-text)]">Truck Records</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
             View Recorded Truck Detection Data
           </p>
         </div>
-        <div ref={cameraDropdownRef} className="relative">
+        <div ref={cameraDropdownRef} className="relative w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setCameraDropdownOpen((prev) => !prev)}
-            className="list-none px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors cursor-pointer select-none"
+            className="w-full sm:w-auto list-none px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors cursor-pointer select-none text-left"
           >
             {selectedCameraSummary}
           </button>
@@ -203,7 +203,7 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
           aria-label="Filter by truck"
           value={selectedTruckId ?? ""}
           onChange={handleTruckChange}
-          className="px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
+          className="w-full sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
         >
           <option value="">All Trucks</option>
           {trucks.map((t) => (
@@ -212,14 +212,14 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
             </option>
           ))}
         </select>
-        <div className="ml-auto mr-[150px] flex items-center gap-3">
+        <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-3">
           <DateTimePicker
             value={startDate}
             onChange={setStartDate}
             ariaLabel="Start date and time"
             maxDate={parseDateTimeLocal(endDate) || undefined}
           />
-          <span className="text-[var(--color-muted)]">→</span>
+          <span className="text-[var(--color-muted)] hidden sm:inline">→</span>
           <DateTimePicker
             value={endDate}
             onChange={setEndDate}

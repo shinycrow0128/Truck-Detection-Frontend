@@ -103,8 +103,8 @@ export function DetectionList({ detections, onDetectionUpdated }: DetectionListP
   const isAdmin = useMemo(() => userRole === "admin", [userRole]);
 
   return (
-    <main className="flex-1 w-full px-2 py-6">
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    <main className="flex-1 w-full px-3 sm:px-4 py-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {detections.map((d) => (
           <DetectionCard
             key={d.id}
@@ -140,6 +140,28 @@ function normalizeBinStatus(value: string | null): BinStatus | null {
 function titleCase(value: string) {
   if (!value) return value;
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function statusChipClasses(kind: "truck" | "bin", value: string) {
+  const base =
+    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium leading-none";
+  if (kind === "truck") {
+    if (value === "incoming") {
+      return `${base} border-emerald-200/60 bg-emerald-50/70 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200`;
+    }
+    if (value === "outgoing") {
+      return `${base} border-blue-200/60 bg-blue-50/70 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-200`;
+    }
+  }
+  if (kind === "bin") {
+    if (value === "full") {
+      return `${base} border-amber-200/60 bg-amber-50/70 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200`;
+    }
+    if (value === "empty") {
+      return `${base} border-slate-200/70 bg-slate-50/70 text-slate-700 dark:border-slate-700/60 dark:bg-slate-900/40 dark:text-slate-200`;
+    }
+  }
+  return `${base} border-[var(--color-border)] bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)]`;
 }
 
 function DetectionCard({
@@ -212,7 +234,7 @@ function DetectionCard({
 
   return (
     <article
-      className="bg-[var(--color-bg-elevated)] rounded-xl border border-[var(--color-border)] overflow-hidden shadow-[var(--color-shadow)] hover:shadow-[var(--color-shadow-lg)] transition-all duration-300 hover:-translate-y-0.5"
+      className="group bg-[var(--color-bg-elevated)] rounded-2xl border border-[var(--color-border)] overflow-hidden shadow-[var(--color-shadow)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--color-shadow-lg)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/25"
     >
       <div className="aspect-video bg-[var(--color-bg-hover)] relative">
         {d.video_url ? (
@@ -232,28 +254,39 @@ function DetectionCard({
             No media
           </div>
         )}
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center gap-2 text-xs text-white/90">
-          <span>{formatDate(d.detected_at)}</span>
-          <div className="flex items-center gap-2">
-            {duration !== null && (
-              <span className="bg-black/40 px-2 py-0.5 rounded">
-                {formatDuration(duration)}
-              </span>
-            )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 via-black/20 to-transparent" />
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2">
+          <div className="min-w-0">
+            <div className="text-[11px] font-medium text-white/95 truncate">
+              {formatDate(d.detected_at)}
+            </div>
+            <div className="text-[11px] text-white/80 truncate">
+              {d.camera?.camera_name ?? d.camera?.camera_location ?? d.camera_id.slice(0, 8)}
+            </div>
           </div>
+          {duration !== null ? (
+            <span className="shrink-0 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur">
+              {formatDuration(duration)}
+            </span>
+          ) : null}
         </div>
       </div>
-      <div className="p-3 space-y-2">
+      <div className="p-4">
         <div className="flex items-start justify-between gap-3">
-          <p className="text-sm font-medium text-[var(--color-text)] truncate min-w-0">
-            {d.truck?.truck_name ?? d.truck?.truck_number ?? "Truck"}
-          </p>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+              {d.truck?.truck_name ?? d.truck?.truck_number ?? "Truck"}
+            </p>
+            <p className="mt-0.5 text-xs text-[var(--color-text-secondary)] truncate">
+              Detection ID: <span className="font-mono">{String(d.id).slice(0, 8)}</span>
+            </p>
+          </div>
 
           {isAdmin && !isEditing ? (
             <button
               type="button"
               onClick={openEditor}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition-colors"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition-colors"
               aria-label="Edit incoming/outgoing and bin status"
             >
               <svg
@@ -271,37 +304,34 @@ function DetectionCard({
           ) : null}
         </div>
 
-        <p className="text-xs text-[var(--color-text-secondary)] truncate">
-          Camera:{" "}
-          {d.camera?.camera_name ?? d.camera?.camera_location ?? d.camera_id.slice(0, 8)}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           {d.truck_status ? (
-            <span className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-hover)] px-2 py-0.5 text-[11px] text-[var(--color-text-secondary)]">
+            <span className={statusChipClasses("truck", d.truck_status)}>
               Truck: {titleCase(d.truck_status)}
             </span>
-          ) : null}
+          ) : (
+            <span className={statusChipClasses("truck", "unknown")}>Truck: —</span>
+          )}
           {d.bin_status ? (
-            <span className="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-bg-hover)] px-2 py-0.5 text-[11px] text-[var(--color-text-secondary)]">
+            <span className={statusChipClasses("bin", d.bin_status)}>
               Bin: {titleCase(d.bin_status)}
             </span>
-          ) : null}
+          ) : (
+            <span className={statusChipClasses("bin", "unknown")}>Bin: —</span>
+          )}
         </div>
 
         {isAdmin && isEditing ? (
-          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] p-2.5">
-            <div className="flex flex-wrap items-end gap-2">
+          <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+            <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] font-medium text-[var(--color-text-secondary)]">
-                  Truck
+                  Truck status
                 </span>
                 <select
                   value={draftTruckStatus}
-                  onChange={(e) =>
-                    setDraftTruckStatus(e.target.value as TruckStatus)
-                  }
-                  className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
+                  onChange={(e) => setDraftTruckStatus(e.target.value as TruckStatus)}
+                  className="min-w-[140px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
                   disabled={saving}
                 >
                   <option value="incoming">Incoming</option>
@@ -311,12 +341,12 @@ function DetectionCard({
 
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] font-medium text-[var(--color-text-secondary)]">
-                  Bin
+                  Bin status
                 </span>
                 <select
                   value={draftBinStatus}
                   onChange={(e) => setDraftBinStatus(e.target.value as BinStatus)}
-                  className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-2 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
+                  className="min-w-[120px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] px-3 py-2 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30"
                   disabled={saving}
                 >
                   <option value="full">Full</option>
@@ -329,7 +359,7 @@ function DetectionCard({
                   type="button"
                   onClick={closeEditor}
                   disabled={saving}
-                  className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                 >
                   Cancel
                 </button>
@@ -337,7 +367,7 @@ function DetectionCard({
                   type="button"
                   onClick={save}
                   disabled={saving}
-                  className="rounded-md bg-[var(--color-primary)] px-2.5 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {saving ? "Saving…" : "Save"}
                 </button>

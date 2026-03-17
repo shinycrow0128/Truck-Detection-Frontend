@@ -1,6 +1,7 @@
  "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { DatePicker } from "@/components/DatePicker";
 
 type VideoItem = {
   url: string;
@@ -18,18 +19,27 @@ function sortVideoItems(items: VideoItem[], order: SortOrder) {
   return order === "recent" ? sorted.reverse() : sorted;
 }
 
+const toISODate = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 export default function VideoRecordsPage() {
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDateChange = (value: string) => {
-    setSelectedDate(value);
-    // Do not fetch here; only update state. Fetch is triggered
-    // explicitly via the Search button.
-  };
+  useEffect(() => {
+    if (!mounted) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      setSelectedDate(toISODate(now));
+      setMounted(true);
+    }
+  }, [mounted]);
 
   const handleSearch = async () => {
     setError(null);
@@ -117,21 +127,15 @@ export default function VideoRecordsPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:items-end">
-          <label
-            htmlFor="video-date"
-            className="text-xs font-medium text-[var(--color-text-secondary)]"
-          >
-            Date
-          </label>
+        <div className="flex flex-col gap-2 sm:items-end pr-[100px]">
           <div className="flex items-center gap-2">
-            <input
-              id="video-date"
-              type="date"
-              value={selectedDate}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] text-[var(--color-text)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent min-w-[180px]"
-            />
+            <div id="video-date">
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                ariaLabel="Video record date"
+              />
+            </div>
             <button
               type="button"
               onClick={handleSearch}
