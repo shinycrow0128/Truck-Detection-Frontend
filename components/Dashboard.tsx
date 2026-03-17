@@ -104,6 +104,19 @@ export function Dashboard() {
     setFilters(f);
   }, []);
 
+  const handleDetectionUpdated = useCallback(
+    (updated: Pick<TruckDetection, "id" | "bin_status" | "truck_status">) => {
+      setDetections((prev) =>
+        prev.map((d) =>
+          d.id === updated.id
+            ? { ...d, bin_status: updated.bin_status, truck_status: updated.truck_status }
+            : d,
+        ),
+      );
+    },
+    [],
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-subtle)] transition-colors duration-300">
       <FilterBar cameras={cameras} trucks={trucks} onFiltersChange={handleFiltersChange} />
@@ -115,7 +128,7 @@ export function Dashboard() {
         </div>
       )}
       {detections.length > 0 ? (
-        <DetectionList detections={detections} />
+        <DetectionList detections={detections} onDetectionUpdated={handleDetectionUpdated} />
       ) : (
         <EmptyState />
       )}

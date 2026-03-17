@@ -197,7 +197,22 @@ export default function VideoRecordsPage() {
                 <video
                   src={video.url}
                   controls
+                  preload="metadata"
                   className="w-full h-full"
+                  onEnded={(e) => {
+                    // Reset to the initial state (first frame / before-play view)
+                    // instead of staying on the last frame.
+                    const el = e.currentTarget;
+                    try {
+                      el.pause();
+                      el.currentTime = 0;
+                      // Reload to ensure the UI returns to the pre-play poster/first-frame view
+                      // consistently across browsers.
+                      el.load();
+                    } catch {
+                      // no-op
+                    }
+                  }}
                 />
               </div>
               <div className="p-3 flex items-center justify-between gap-2">
