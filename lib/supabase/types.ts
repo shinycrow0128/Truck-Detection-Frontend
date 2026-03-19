@@ -18,6 +18,12 @@ export type Truck = {
   updated_at: string;
 };
 
+export type Video = {
+  id: string;
+  video_url: string | null;
+  date: string | null;
+};
+
 export type UserRole = "admin" | "client";
 
 export type Profile = {
@@ -35,8 +41,9 @@ export type TruckDetection = {
   truck_status: string | null;
   detected_at: string;
   image_url: string | null;
-  video_url: string | null;
+  video_id: string;
   created_at: string;
   camera?: Camera | null;
   truck?: Truck | null;
+  video?: Video | null;
 };

@@ -60,8 +60,7 @@ export function Dashboard() {
       const supabase = createClient();
       let q = supabase
         .from("truck_detections")
-        .select(
-          "*, camera:camera_id(*), truck:truck_id(*)"
+        .select("*, camera:camera_id(*), truck:truck_id(*), video:video_id(*)"
         )
         .gte("detected_at", f.start)
         .lte("detected_at", f.end)
@@ -69,12 +68,18 @@ export function Dashboard() {
         .limit(50);
 
       if (f.cameraIds.length > 0) q = q.in("camera_id", f.cameraIds);
-      else q = q.in("camera_id", []); // no cameras selected → no videos
+      else q = q.in("camera_id", []);
       if (f.truckId) q = q.eq("truck_id", f.truckId);
 
       const { data, error: e } = await q;
       if (e) throw e;
-      setDetections((data as TruckDetection[]) ?? []);
+
+      const withResolvedVideoUrl: TruckDetection[] =
+        (data as any[] | null)?.map((row) => ({
+          ...row,
+          video_url: row.video?.video_url ?? null,
+        })) ?? [];
+      setDetections(withResolvedVideoUrl);
     },
     []
   );
