@@ -1,21 +1,22 @@
  "use client";
 
 import { useEffect, useState } from "react";
-import { DatePicker } from "@/components/DatePicker";
 
 type VideoItem = {
   url: string;
   name: string;
+  date: string; // YYYY-MM-DD
 };
-
-const VIDEO_BASE_URL = process.env.NEXT_PUBLIC_VIDEO_BASE_URL ?? "";
 
 type SortOrder = "recent" | "old";
 
 function sortVideoItems(items: VideoItem[], order: SortOrder) {
-  const sorted = [...items].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
-  );
+  const sorted = [...items].sort((a, b) => {
+    // date ascending, then name ascending
+    const byDate = a.date.localeCompare(b.date);
+    if (byDate !== 0) return byDate;
+    return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+  });
   return order === "recent" ? sorted.reverse() : sorted;
 }
 
@@ -25,8 +26,9 @@ const toISODate = (d: Date) => {
 };
 
 export default function VideoRecordsPage() {
-  const [selectedDate, setSelectedDate] = useState<string>("");
   const [mounted, setMounted] = useState(false);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,9 +36,12 @@ export default function VideoRecordsPage() {
 
   useEffect(() => {
     if (!mounted) {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      setSelectedDate(toISODate(now));
+      const end = new Date();
+      end.setHours(0, 0, 0, 0);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 7);
+      setStartDate(toISODate(start));
+      setEndDate(toISODate(end));
       setMounted(true);
     }
   }, [mounted]);
@@ -45,68 +50,43 @@ export default function VideoRecordsPage() {
     setError(null);
     setVideos([]);
 
-    if (!selectedDate || !VIDEO_BASE_URL) {
+    if (!startDate || !endDate) {
       return;
     }
 
-    // Only fire the request when the date is fully formed as YYYY-MM-DD.
+    // Only fire the request when the dates are fully formed as YYYY-MM-DD.
     if (
-      selectedDate.length < 10 ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)
+      startDate.length < 10 ||
+      endDate.length < 10 ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
     ) {
       return;
     }
 
-    const [yearStr, monthStr, dayStr] = selectedDate.split("-");
-    if (!yearStr || !monthStr || !dayStr) {
-      setError("Invalid date selected.");
+    const start = new Date(`${startDate}T00:00:00Z`);
+    const end = new Date(`${endDate}T00:00:00Z`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+      setError("Invalid date range selected.");
       return;
     }
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `/api/video-records?date=${encodeURIComponent(selectedDate)}`,
-      );
+      const params = new URLSearchParams({ start: startDate, end: endDate });
+      const response = await fetch(`/api/video-records?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch videos for ${selectedDate}.`);
+        throw new Error(`Failed to fetch videos for ${startDate} → ${endDate}.`);
       }
 
-      const { html, listingUrl } = (await response.json()) as {
-        html: string;
-        listingUrl: string;
+      const { items } = (await response.json()) as {
+        items: VideoItem[];
       };
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
-      const links = Array.from(doc.querySelectorAll("a"));
-
-      const videoItems: VideoItem[] = links
-        .map((link) => {
-          const href = link.getAttribute("href") ?? "";
-          const text = link.textContent?.trim() ?? "";
-
-          if (!href.toLowerCase().endsWith(".mp4")) {
-            return null;
-          }
-
-          const videoUrl = href.startsWith("http")
-            ? href
-            : `${listingUrl}${href}`;
-
-          const name = text || href;
-
-          return {
-            url: videoUrl,
-            name,
-          };
-        })
-        .filter((item): item is VideoItem => item !== null);
-
-      setVideos(videoItems);
-      if (videoItems.length === 0) {
-        setError("No videos found for the selected date.");
+      setVideos(items);
+      if (items.length === 0) {
+        setError("No videos found for the selected period.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load videos.");
@@ -123,24 +103,58 @@ export default function VideoRecordsPage() {
             Video Records
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            Select a date to view all recorded videos for that day.
+            Select a date range to view recorded videos in that period.
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:items-end pr-[100px]">
-          <div className="flex items-center gap-2">
-            <div id="video-date">
-              <DatePicker
-                value={selectedDate}
-                onChange={setSelectedDate}
-                ariaLabel="Video record date"
+        <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-bg-elevated)]/95 via-[var(--color-bg-elevated)] to-[var(--color-bg-elevated)] px-3 py-2 shadow-sm">
+          <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              className="w-4 h-4"
+            >
+              <rect x="3.5" y="4.5" width="17" height="16" rx="2.5" />
+              <path d="M8 3v3.5M16 3v3.5" />
+              <path d="M3.5 10h17" />
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <input
+                type="date"
+                value={startDate}
+                max={endDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="peer w-[9.5rem] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] shadow-[0_0_0_1px_rgba(255,255,255,0.02)] outline-none transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/40 hover:border-[var(--color-primary)]/60"
               />
+              <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[var(--color-text-secondary)] peer-focus:text-[var(--color-primary)]">
+                ▼
+              </span>
             </div>
+
+            <div className="relative">
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="peer w-[9.5rem] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] shadow-[0_0_0_1px_rgba(255,255,255,0.02)] outline-none transition-all focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/40 hover:border-[var(--color-primary)]/60"
+              />
+              <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[var(--color-text-secondary)] peer-focus:text-[var(--color-primary)]">
+                ▼
+              </span>
+            </div>
+
             <button
               type="button"
               onClick={handleSearch}
+              disabled={isLoading || !startDate || !endDate}
               className="px-4 py-2 rounded-lg bg-[var(--color-primary)] text-white text-sm font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isLoading || !selectedDate}
             >
               Search
             </button>
@@ -160,9 +174,9 @@ export default function VideoRecordsPage() {
         </div>
       )}
 
-      {!isLoading && !error && selectedDate && videos.length === 0 && (
+      {!isLoading && !error && startDate && endDate && videos.length === 0 && (
         <div className="text-sm text-[var(--color-text-secondary)]">
-          No videos found for the selected date.
+          No videos found for the selected period.
         </div>
       )}
 
@@ -220,9 +234,14 @@ export default function VideoRecordsPage() {
                 />
               </div>
               <div className="p-3 flex items-center justify-between gap-2">
-                <p className="text-xs font-medium text-[var(--color-text)] truncate">
-                  {video.name}
-                </p>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-[var(--color-text)] truncate">
+                    {video.name}
+                  </p>
+                  <p className="text-[11px] text-[var(--color-text-secondary)]">
+                    {video.date}
+                  </p>
+                </div>
                 <a
                   href={video.url}
                   target="_blank"
