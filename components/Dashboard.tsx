@@ -27,6 +27,7 @@ export function Dashboard() {
   const [trucks, setTrucks] = useState<Truck[]>([]);
   const [detections, setDetections] = useState<TruckDetection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [metaLoaded, setMetaLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     cameraIds: [],
@@ -87,11 +88,27 @@ export function Dashboard() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      try {
+        await Promise.all([fetchCameras(), fetchTrucks()]);
+        if (!cancelled) setMetaLoaded(true);
+      } catch (e) {
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : "Failed to load data");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchCameras, fetchTrucks]);
+
+  useEffect(() => {
+    if (!metaLoaded) return;
+
+    let cancelled = false;
+    (async () => {
       setLoading(true);
       setError(null);
       try {
-        await Promise.all([fetchCameras(), fetchTrucks()]);
-        if (cancelled) return;
         await fetchDetections(filters);
       } catch (e) {
         if (!cancelled)
@@ -100,10 +117,11 @@ export function Dashboard() {
         if (!cancelled) setLoading(false);
       }
     })();
+
     return () => {
       cancelled = true;
     };
-  }, [fetchCameras, fetchTrucks, fetchDetections, filters]);
+  }, [metaLoaded, fetchDetections, filters]);
 
   const handleFiltersChange = useCallback((f: Filters) => {
     setFilters(f);

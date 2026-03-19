@@ -86,11 +86,8 @@ export function DashboardStats() {
         .join(",")
     );
 
-    // All detections in selected period, sorted by detected_at ascending
-    const sortedDetections = [...data.detectionsForExport].sort(
-      (a, b) =>
-        new Date(a.detected_at).getTime() - new Date(b.detected_at).getTime()
-    );
+    // The API already returns detections sorted by detected_at ascending.
+    const sortedDetections = data.detectionsForExport;
 
     sortedDetections.forEach((row, index) => {
       lines.push(
