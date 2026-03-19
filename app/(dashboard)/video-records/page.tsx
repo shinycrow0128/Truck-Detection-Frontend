@@ -33,6 +33,7 @@ export default function VideoRecordsPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasAutoSearched, setHasAutoSearched] = useState(false);
 
   useEffect(() => {
     if (!mounted) {
@@ -45,6 +46,19 @@ export default function VideoRecordsPage() {
       setMounted(true);
     }
   }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (hasAutoSearched) return;
+    if (!startDate || !endDate) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+      return;
+    }
+
+    setHasAutoSearched(true);
+    void handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, startDate, endDate, hasAutoSearched]);
 
   const handleSearch = async () => {
     setError(null);
