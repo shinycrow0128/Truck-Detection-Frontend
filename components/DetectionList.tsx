@@ -237,9 +237,9 @@ function DetectionCard({
       className="group bg-[var(--color-bg-elevated)] rounded-2xl border border-[var(--color-border)] overflow-hidden shadow-[var(--color-shadow)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--color-shadow-lg)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/25"
     >
       <div className="aspect-video bg-[var(--color-bg-hover)] relative">
-        {d.video_url ? (
+        {d.video_id ? (
           <VideoWithDuration
-            src={d.video_url}
+            src={d.video_id}
             poster={d.image_url ?? undefined}
             onDurationLoaded={setDuration}
           />
