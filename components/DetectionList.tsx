@@ -8,6 +8,7 @@ import type { UserRole } from "@/lib/supabase/types";
 type DetectionListProps = {
   detections: TruckDetection[];
   onDetectionUpdated?: (updated: Pick<TruckDetection, "id" | "bin_status" | "truck_status">) => void;
+  onDetectionDeleted?: (deletedId: TruckDetection["id"]) => void;
 };
 
 function formatDate(iso: string) {
@@ -65,7 +66,7 @@ function VideoWithDuration({
   );
 }
 
-export function DetectionList({ detections, onDetectionUpdated }: DetectionListProps) {
+export function DetectionList({ detections, onDetectionUpdated, onDetectionDeleted }: DetectionListProps) {
   if (detections.length === 0) return null;
 
   const [userRole, setUserRole] = useState<UserRole | null>(null);
@@ -111,6 +112,7 @@ export function DetectionList({ detections, onDetectionUpdated }: DetectionListP
             detection={d}
             isAdmin={isAdmin}
             onDetectionUpdated={onDetectionUpdated}
+            onDetectionDeleted={onDetectionDeleted}
           />
         ))}
       </div>
@@ -168,10 +170,12 @@ function DetectionCard({
   detection: d,
   isAdmin,
   onDetectionUpdated,
+  onDetectionDeleted,
 }: {
   detection: TruckDetection;
   isAdmin: boolean;
   onDetectionUpdated?: (updated: Pick<TruckDetection, "id" | "bin_status" | "truck_status">) => void;
+  onDetectionDeleted?: (deletedId: TruckDetection["id"]) => void;
 }) {
   const [duration, setDuration] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -183,6 +187,8 @@ function DetectionCard({
   );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const openEditor = () => {
     setSaveError(null);
@@ -229,6 +235,32 @@ function DetectionCard({
       setSaveError(e instanceof Error ? e.message : "Failed to update");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const remove = async () => {
+    const confirmed = window.confirm("Delete this video clip record? This action cannot be undone.");
+    if (!confirmed) return;
+
+    setDeleteError(null);
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/truck-detections/${d.id}`, {
+        method: "DELETE",
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { success?: boolean; error?: string }
+        | null;
+
+      if (!res.ok) {
+        throw new Error(json?.error || "Failed to delete detection");
+      }
+
+      onDetectionDeleted?.(d.id);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Failed to delete");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -283,24 +315,48 @@ function DetectionCard({
           </div>
 
           {isAdmin && !isEditing ? (
-            <button
-              type="button"
-              onClick={openEditor}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] transition-colors"
-              aria-label="Edit incoming/outgoing and bin status"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-4 w-4"
+            <div className="shrink-0 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={openEditor}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                aria-label="Edit incoming/outgoing and bin status"
               >
-                <path d="M21.73 2.27a2.625 2.625 0 0 0-3.712 0l-1.5 1.5 3.712 3.712 1.5-1.5a2.625 2.625 0 0 0 0-3.712Z" />
-                <path d="M19.8 8.7 16.1 5l-9.6 9.6a.75.75 0 0 0-.2.34l-.9 3.6a.75.75 0 0 0 .91.91l3.6-.9a.75.75 0 0 0 .34-.2l9.55-9.55Z" />
-                <path d="M4.5 20.25a.75.75 0 0 1-.75-.75v-11a.75.75 0 0 1 1.5 0v11h11a.75.75 0 0 1 0 1.5h-11Z" />
-              </svg>
-              <span>Edit</span>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path d="M21.73 2.27a2.625 2.625 0 0 0-3.712 0l-1.5 1.5 3.712 3.712 1.5-1.5a2.625 2.625 0 0 0 0-3.712Z" />
+                  <path d="M19.8 8.7 16.1 5l-9.6 9.6a.75.75 0 0 0-.2.34l-.9 3.6a.75.75 0 0 0 .91.91l3.6-.9a.75.75 0 0 0 .34-.2l9.55-9.55Z" />
+                  <path d="M4.5 20.25a.75.75 0 0 1-.75-.75v-11a.75.75 0 0 1 1.5 0v11h11a.75.75 0 0 1 0 1.5h-11Z" />
+                </svg>
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={remove}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed transition-colors dark:border-red-800 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-900/40"
+                aria-label="Delete video clip record"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-4 w-4"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M9 3.75A2.25 2.25 0 0 1 11.25 1.5h1.5A2.25 2.25 0 0 1 15 3.75V4.5h4.125a.75.75 0 0 1 0 1.5H18.4l-.62 12.174A2.25 2.25 0 0 1 15.533 20.4H8.467a2.25 2.25 0 0 1-2.247-2.226L5.6 6H4.875a.75.75 0 0 1 0-1.5H9v-.75Zm1.5.75h3v-.75a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75v.75Zm-1.563 4.125a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-1.5 0v-7.5a.75.75 0 0 1 .75-.75Zm6.126 0a.75.75 0 0 1 .75.75v7.5a.75.75 0 1 1-1.5 0v-7.5a.75.75 0 0 1 .75-.75Zm-3.063 0a.75.75 0 0 1 .75.75v7.5a.75.75 0 1 1-1.5 0v-7.5a.75.75 0 0 1 .75-.75Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{deleting ? "Deleting…" : "Delete"}</span>
+              </button>
+            </div>
           ) : null}
         </div>
 
@@ -374,11 +430,10 @@ function DetectionCard({
               </div>
             </div>
 
-            {saveError ? (
-              <p className="mt-2 text-[11px] text-red-600">{saveError}</p>
-            ) : null}
+            {saveError ? <p className="mt-2 text-[11px] text-red-600">{saveError}</p> : null}
           </div>
         ) : null}
+        {deleteError ? <p className="mt-2 text-[11px] text-red-600">{deleteError}</p> : null}
       </div>
     </article>
   );

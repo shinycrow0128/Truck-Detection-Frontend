@@ -140,6 +140,10 @@ export function Dashboard() {
     [],
   );
 
+  const handleDetectionDeleted = useCallback((deletedId: TruckDetection["id"]) => {
+    setDetections((prev) => prev.filter((d) => d.id !== deletedId));
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-subtle)] transition-colors duration-300">
       <FilterBar cameras={cameras} trucks={trucks} onFiltersChange={handleFiltersChange} />
@@ -151,7 +155,11 @@ export function Dashboard() {
         </div>
       )}
       {detections.length > 0 ? (
-        <DetectionList detections={detections} onDetectionUpdated={handleDetectionUpdated} />
+        <DetectionList
+          detections={detections}
+          onDetectionUpdated={handleDetectionUpdated}
+          onDetectionDeleted={handleDetectionDeleted}
+        />
       ) : (
         <EmptyState />
       )}
