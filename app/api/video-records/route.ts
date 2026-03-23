@@ -59,12 +59,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createClient();
+
+    // Supabase "date" filtering can behave like a timestamp compare depending on column type.
+    // Using an exclusive upper bound ensures the selected `endDate` (YYYY-MM-DD) is fully included.
+    const endExclusive = new Date(`${endDate}T00:00:00Z`);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+    const endExclusiveDate = endExclusive.toISOString().slice(0, 10); // YYYY-MM-DD
+
     const { data, error } = await supabase
       .from("video")
       .select("video_url, date")
       .not("video_url", "is", null)
       .gte("date", startDate)
-      .lte("date", endDate)
+      .lt("date", endExclusiveDate)
       .order("date", { ascending: false });
 
     if (error) {
