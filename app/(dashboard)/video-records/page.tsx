@@ -20,6 +20,25 @@ function sortVideoItems(items: VideoItem[], order: SortOrder) {
   return order === "recent" ? sorted.reverse() : sorted;
 }
 
+function groupVideoItemsByDate(items: VideoItem[], order: SortOrder) {
+  const sorted = sortVideoItems(items, order);
+  const groups: Array<{ date: string; items: VideoItem[] }> = [];
+  const byDate = new Map<string, VideoItem[]>();
+
+  for (const item of sorted) {
+    const existing = byDate.get(item.date);
+    if (existing) {
+      existing.push(item);
+    } else {
+      const arr: VideoItem[] = [item];
+      byDate.set(item.date, arr);
+      groups.push({ date: item.date, items: arr });
+    }
+  }
+
+  return groups;
+}
+
 const toISODate = (d: Date) => {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -219,54 +238,66 @@ export default function VideoRecordsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {sortVideoItems(videos, sortOrder).map((video) => (
-            <div
-              key={video.url}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] overflow-hidden flex flex-col"
-            >
-              <div className="aspect-video bg-[var(--color-bg)]">
-                <video
-                  src={video.url}
-                  controls
-                  preload="metadata"
-                  className="w-full h-full"
-                  onEnded={(e) => {
-                    // Reset to the initial state (first frame / before-play view)
-                    // instead of staying on the last frame.
-                    const el = e.currentTarget;
-                    try {
-                      el.pause();
-                      el.currentTime = 0;
-                      // Reload to ensure the UI returns to the pre-play poster/first-frame view
-                      // consistently across browsers.
-                      el.load();
-                    } catch {
-                      // no-op
-                    }
-                  }}
-                />
-              </div>
-              <div className="p-3 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-[var(--color-text)] truncate">
-                    {video.name}
-                  </p>
-                  <p className="text-[11px] text-[var(--color-text-secondary)]">
-                    {video.date}
+          <div className="space-y-6">
+            {groupVideoItemsByDate(videos, sortOrder).map((group) => (
+              <section key={group.date} className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-[var(--color-text)]">
+                    {group.date}
+                  </h2>
+                  <p className="text-xs text-[var(--color-text-secondary)]">
+                    {group.items.length} video{group.items.length === 1 ? "" : "s"}
                   </p>
                 </div>
-                <a
-                  href={video.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-medium text-[var(--color-primary)] hover:underline shrink-0"
-                >
-                  Open
-                </a>
-              </div>
-            </div>
-          ))}
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {group.items.map((video) => (
+                    <div
+                      key={video.url}
+                      className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] overflow-hidden flex flex-col"
+                    >
+                      <div className="aspect-video bg-[var(--color-bg)]">
+                        <video
+                          src={video.url}
+                          controls
+                          preload="metadata"
+                          className="w-full h-full"
+                          onEnded={(e) => {
+                            // Reset to the initial state (first frame / before-play view)
+                            // instead of staying on the last frame.
+                            const el = e.currentTarget;
+                            try {
+                              el.pause();
+                              el.currentTime = 0;
+                              // Reload to ensure the UI returns to the pre-play poster/first-frame view
+                              // consistently across browsers.
+                              el.load();
+                            } catch {
+                              // no-op
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="p-3 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-[var(--color-text)] truncate">
+                            {video.name}
+                          </p>
+                        </div>
+                        <a
+                          href={video.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs font-medium text-[var(--color-primary)] hover:underline shrink-0"
+                        >
+                          Open
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         </div>
       )}
