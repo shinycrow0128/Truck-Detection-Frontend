@@ -11,6 +11,17 @@ type DetectionListProps = {
   onDetectionDeleted?: (deletedId: TruckDetection["id"]) => void;
 };
 
+function getDateKeyFromISO(iso: string) {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  } catch {
+    return iso;
+  }
+}
+
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleString();
@@ -103,17 +114,47 @@ export function DetectionList({ detections, onDetectionUpdated, onDetectionDelet
 
   const isAdmin = useMemo(() => userRole === "admin", [userRole]);
 
+  const groupedDetections = useMemo(() => {
+    const groups: Array<{ date: string; items: TruckDetection[] }> = [];
+    const indexByDate = new Map<string, number>();
+
+    for (const d of detections) {
+      const dateKey = getDateKeyFromISO(d.detected_at);
+      const idx = indexByDate.get(dateKey);
+      if (idx === undefined) {
+        indexByDate.set(dateKey, groups.length);
+        groups.push({ date: dateKey, items: [d] });
+      } else {
+        groups[idx].items.push(d);
+      }
+    }
+
+    return groups;
+  }, [detections]);
+
   return (
     <main className="flex-1 w-full px-3 sm:px-4 py-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {detections.map((d) => (
-          <DetectionCard
-            key={d.id}
-            detection={d}
-            isAdmin={isAdmin}
-            onDetectionUpdated={onDetectionUpdated}
-            onDetectionDeleted={onDetectionDeleted}
-          />
+      <div className="space-y-6">
+        {groupedDetections.map((group) => (
+          <section key={group.date} className="space-y-3">
+            <div className="flex items-center justify-between gap-3 px-1">
+              <h2 className="text-sm font-semibold text-[var(--color-text)]">{group.date}</h2>
+              <p className="text-xs text-[var(--color-text-secondary)]">
+                {group.items.length} record{group.items.length === 1 ? "" : "s"}
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {group.items.map((d) => (
+                <DetectionCard
+                  key={d.id}
+                  detection={d}
+                  isAdmin={isAdmin}
+                  onDetectionUpdated={onDetectionUpdated}
+                  onDetectionDeleted={onDetectionDeleted}
+                />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </main>
