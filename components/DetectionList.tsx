@@ -16,7 +16,8 @@ function getDateKeyFromISO(iso: string) {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
     const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    // Use UTC to avoid browser timezone shifting the calendar day.
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
   } catch {
     return iso;
   }
@@ -24,7 +25,17 @@ function getDateKeyFromISO(iso: string) {
 
 function formatDate(iso: string) {
   try {
-    return new Date(iso).toLocaleString();
+    // Render in UTC so the timestamp matches the media filename time.
+    return new Date(iso).toLocaleString("en-US", {
+      timeZone: "UTC",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
   } catch {
     return iso;
   }
