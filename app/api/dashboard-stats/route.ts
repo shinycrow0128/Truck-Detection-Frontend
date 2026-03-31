@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
       parsedStart <= parsedEnd
     ) {
       startDate = parsedStart;
-      now = parsedEnd;
+      now = new Date(parsedEnd);
+      // Include the full selected end day instead of only 00:00:00.
+      now.setUTCHours(23, 59, 59, 999);
     } else {
       switch (range) {
         case "1d":
