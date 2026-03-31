@@ -56,9 +56,3 @@ Ensure Row Level Security (RLS) allows your anon key to `SELECT` from these tabl
 - **Filter bar** – “All Cameras” (camera), “All” (status), and date range filters
 - **Empty state** – “No Videos Yet” with data protection message and action buttons when there are no detections
 - **Detection list** – Grid of detection cards with video/image, timestamp, truck, camera, and status when data exists
-
-## Project structure
-
-- `app/` – Layout and home page
-- `components/` – `FilterBar`, `EmptyState`, `DetectionList`, `Dashboard`
-- `lib/supabase/` – Supabase client and TypeScript types
