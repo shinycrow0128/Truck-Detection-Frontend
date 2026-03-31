@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import type { TruckDetection } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/supabase/types";
@@ -218,7 +218,7 @@ function statusChipClasses(kind: "truck" | "bin", value: string) {
   return `${base} border-[var(--color-border)] bg-[var(--color-bg-hover)] text-[var(--color-text-secondary)]`;
 }
 
-function DetectionCard({
+const DetectionCard = memo(function DetectionCard({
   detection: d,
   isAdmin,
   onDetectionUpdated,
@@ -241,6 +241,13 @@ function DetectionCard({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const formattedDetectedAt = useMemo(() => formatDate(d.detected_at), [d.detected_at]);
+  const cameraLine = useMemo(
+    () =>
+      d.camera?.camera_name ?? d.camera?.camera_location ?? d.camera_id.slice(0, 8),
+    [d.camera?.camera_name, d.camera?.camera_location, d.camera_id],
+  );
 
   const openEditor = () => {
     setSaveError(null);
@@ -331,6 +338,8 @@ function DetectionCard({
           <img
             src={d.image_url}
             alt={`Detection ${d.id}`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-contain"
           />
         ) : (
@@ -342,10 +351,10 @@ function DetectionCard({
         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end gap-2">
           <div className="min-w-0">
             <div className="text-[11px] font-medium text-white/95 truncate">
-              {formatDate(d.detected_at)}
+              {formattedDetectedAt}
             </div>
             <div className="text-[11px] text-white/80 truncate">
-              {d.camera?.camera_name ?? d.camera?.camera_location ?? d.camera_id.slice(0, 8)}
+              {cameraLine}
             </div>
           </div>
           {duration !== null ? (
@@ -489,4 +498,4 @@ function DetectionCard({
       </div>
     </article>
   );
-}
+});
