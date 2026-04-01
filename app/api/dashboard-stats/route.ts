@@ -48,6 +48,10 @@ export async function GET(request: NextRequest) {
   const range = searchParams.get("range") || "7d";
   const startParam = searchParams.get("start");
   const endParam = searchParams.get("end");
+  const recentLimitParam = Number.parseInt(searchParams.get("recentLimit") || "10", 10);
+  const recentLimit = Number.isFinite(recentLimitParam)
+    ? Math.min(Math.max(recentLimitParam, 1), 100)
+    : 10;
 
   // Calculate date range
   let now = new Date();
@@ -238,6 +242,7 @@ export async function GET(request: NextRequest) {
     const cameraMap: Record<string, { name: string; location: string; count: number }> = {};
     for (const d of allDetections) {
       const cid = d.camera_id;
+      if (!cid) continue;
       if (!cameraMap[cid]) {
         const camInfo = d.camera as { id: string; camera_name: string; camera_location: string } | null;
         cameraMap[cid] = {
@@ -265,7 +270,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // --- Recent detections ---
-    const recentDetections = allDetections.slice(-10).reverse().map((d) => ({
+    const recentDetections = allDetections.slice(-recentLimit).reverse().map((d) => ({
       id: d.id,
       detected_at: d.detected_at,
       bin_status: d.bin_status,

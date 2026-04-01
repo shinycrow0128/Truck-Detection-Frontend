@@ -12,6 +12,8 @@ type RecentDetectionsProps = {
     camera_name: string;
   }>;
   loading: boolean;
+  limit: number;
+  onLimitChange: (limit: number) => void;
 };
 
 function StatusBadge({ status, type }: { status: string | null; type: "bin" | "truck" }) {
@@ -49,7 +51,12 @@ function StatusBadge({ status, type }: { status: string | null; type: "bin" | "t
   );
 }
 
-export function RecentDetections({ data, loading }: RecentDetectionsProps) {
+export function RecentDetections({
+  data,
+  loading,
+  limit,
+  onLimitChange,
+}: RecentDetectionsProps) {
   const formatDateTime = (dt: string) => {
     const d = new Date(dt);
     return d.toLocaleString("en-US", {
@@ -61,7 +68,25 @@ export function RecentDetections({ data, loading }: RecentDetectionsProps) {
   };
 
   return (
-    <ChartCard title="Recent Detections" subtitle="Latest 10 truck detections" loading={loading}>
+    <ChartCard
+      title="Recent Detections"
+      subtitle={`Latest ${limit} truck detections`}
+      loading={loading}
+      actions={(
+        <label className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+          <span>Show</span>
+          <select
+            value={String(limit)}
+            onChange={(e) => onLimitChange(Number(e.target.value))}
+            className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)]"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+      )}
+    >
       <div className="overflow-auto">
         {data.length === 0 ? (
           <div className="flex items-center justify-center h-[200px] text-sm text-[var(--color-text-secondary)]">

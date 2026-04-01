@@ -48,6 +48,7 @@ export type DashboardData = {
 };
 
 export function DashboardStats() {
+  const [recentLimit, setRecentLimit] = useState<number>(10);
   const [startDate, setStartDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() - 7);
@@ -120,11 +121,11 @@ export function DashboardStats() {
     URL.revokeObjectURL(url);
   }, [data, startDate, endDate]);
 
-  const fetchStats = useCallback(async (start: string, end: string) => {
+  const fetchStats = useCallback(async (start: string, end: string, limit: number) => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ start, end });
+      const params = new URLSearchParams({ start, end, recentLimit: String(limit) });
       const res = await fetch(`/api/dashboard-stats?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch dashboard stats");
       const json = await res.json();
@@ -151,8 +152,8 @@ export function DashboardStats() {
       return;
     }
 
-    fetchStats(startDate, endDate);
-  }, [startDate, endDate, fetchStats]);
+    fetchStats(startDate, endDate, recentLimit);
+  }, [startDate, endDate, recentLimit, fetchStats]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -258,7 +259,12 @@ export function DashboardStats() {
             </div>
 
             {/* Recent Detections */}
-            <RecentDetections data={data.recentDetections} loading={loading} />
+            <RecentDetections
+              data={data.recentDetections}
+              loading={loading}
+              limit={recentLimit}
+              onLimitChange={setRecentLimit}
+            />
           </div>
         )}
         {loading && !data && (
