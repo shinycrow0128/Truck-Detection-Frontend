@@ -1,6 +1,47 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+const DEDUPE_WINDOW_MS = 5 * 60 * 1000;
+
+type DetectionRecord = {
+  id: string;
+  detected_at: string;
+  truck_id: string | null;
+  camera_id: string | null;
+  bin_status: string | null;
+  truck_status: string | null;
+  truck?: unknown;
+  camera?: unknown;
+};
+
+function getDeduplicationKey(detection: DetectionRecord): string {
+  const truckId = detection.truck_id ?? "unknown-truck";
+  const cameraId = detection.camera_id ?? "unknown-camera";
+  const binStatus = (detection.bin_status ?? "unknown").trim().toLowerCase();
+  const truckStatus = (detection.truck_status ?? "unknown").trim().toLowerCase();
+  return `${truckId}::${cameraId}::${binStatus}::${truckStatus}`;
+}
+
+function dedupeDetectionsWithinWindow<T extends DetectionRecord>(detections: T[]): T[] {
+  const lastSeenByKey = new Map<string, number>();
+  const deduped: T[] = [];
+
+  for (const detection of detections) {
+    const detectedAt = new Date(detection.detected_at).getTime();
+    if (Number.isNaN(detectedAt)) continue;
+
+    const key = getDeduplicationKey(detection);
+    const lastSeen = lastSeenByKey.get(key);
+
+    if (lastSeen === undefined || detectedAt - lastSeen > DEDUPE_WINDOW_MS) {
+      deduped.push(detection);
+      lastSeenByKey.set(key, detectedAt);
+    }
+  }
+
+  return deduped;
+}
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const { searchParams } = request.nextUrl;
@@ -91,13 +132,14 @@ export async function GET(request: NextRequest) {
     const prevStart = new Date(startDate.getTime() - (now.getTime() - startDate.getTime()));
     const { data: prevDetections, error: prevError } = await supabase
       .from("truck_detections")
-      .select("id")
+      .select("id, detected_at, truck_id, camera_id, bin_status, truck_status")
       .gte("detected_at", prevStart.toISOString())
-      .lt("detected_at", startDate.toISOString());
+      .lt("detected_at", startDate.toISOString())
+      .order("detected_at", { ascending: true });
     if (prevError) throw prevError;
 
-    const allDetections = detections ?? [];
-    const prevCount = prevDetections?.length ?? 0;
+    const allDetections = dedupeDetectionsWithinWindow((detections ?? []) as DetectionRecord[]);
+    const prevCount = dedupeDetectionsWithinWindow((prevDetections ?? []) as DetectionRecord[]).length;
 
     // --- KPI Summary ---
     const totalDetections = allDetections.length;
