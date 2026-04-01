@@ -220,7 +220,7 @@ export async function GET(request: NextRequest) {
     const truckMap: Record<string, { name: string; number: string; count: number }> = {};
     for (const d of allDetections) {
       const tid = d.truck_id;
-      if (!truckMap[tid]) {
+      if (tid && !truckMap[tid]) {
         const truckInfo = d.truck as { id: string; truck_name: string; truck_number: string } | null;
         truckMap[tid] = {
           name: truckInfo?.truck_name || "Unknown",
@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
           count: 0,
         };
       }
-      truckMap[tid].count++;
+      if (tid) truckMap[tid].count++;
     }
     const truckBreakdown = Object.entries(truckMap)
       .map(([id, data]) => ({ id, ...data }))
