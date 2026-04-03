@@ -39,6 +39,8 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
   const [selectedTruckId, setSelectedTruckId] = useState<string | null>(null);
   const [cameraDropdownOpen, setCameraDropdownOpen] = useState(false);
   const cameraDropdownRef = useRef<HTMLDivElement>(null);
+  const [truckDropdownOpen, setTruckDropdownOpen] = useState(false);
+  const truckDropdownRef = useRef<HTMLDivElement>(null);
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -72,6 +74,17 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
     if (labels.length <= 2) return labels.join(", ");
     return `${labels.slice(0, 2).join(", ")} +${labels.length - 2}`;
   }, [cameras, cameraLabel, selectedCameraIds, allCamerasSelected]);
+
+  const truckLabel = useCallback(
+    (t: Truck) => t.truck_name ?? t.truck_number ?? t.id.slice(0, 8),
+    [],
+  );
+
+  const selectedTruckSummary = useMemo(() => {
+    if (!selectedTruckId) return "All Trucks";
+    const t = trucks.find((x) => x.id === selectedTruckId);
+    return t ? truckLabel(t) : selectedTruckId.slice(0, 8);
+  }, [selectedTruckId, trucks, truckLabel]);
 
   const toggleCamera = (id: string) => {
     setSelectedCameraIds((prev) => {
@@ -127,10 +140,27 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
     }
   }, [cameraDropdownOpen]);
 
-  const handleTruckChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const v = e.target.value;
-    setSelectedTruckId(v === "" ? null : v);
+  const selectTruck = (id: string | null) => {
+    setSelectedTruckId(id);
+    setTruckDropdownOpen(false);
   };
+
+  // Close truck dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        truckDropdownRef.current &&
+        !truckDropdownRef.current.contains(event.target as Node)
+      ) {
+        setTruckDropdownOpen(false);
+      }
+    };
+
+    if (truckDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [truckDropdownOpen]);
 
   useEffect(() => {
     if (!onFiltersChange) return;
@@ -199,20 +229,55 @@ export function FilterBar({ cameras, trucks, onFiltersChange }: FilterBarProps) 
           </div>
           )}
         </div>
-        <select
-          aria-label="Filter by truck"
-          value={selectedTruckId ?? ""}
-          onChange={handleTruckChange}
-          className="w-full sm:w-auto px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors"
-        >
-          <option value="">All Trucks</option>
-          {trucks.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.truck_name ?? t.truck_number ?? t.id.slice(0, 8)}
-            </option>
-          ))}
-        </select>
-        <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-3">
+        <div ref={truckDropdownRef} className="relative w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setTruckDropdownOpen((prev) => !prev)}
+            className="w-full sm:w-auto list-none px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text-secondary)] bg-[var(--color-bg-elevated)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors cursor-pointer select-none text-left"
+            aria-label="Filter by truck"
+          >
+            {selectedTruckSummary}
+          </button>
+          {truckDropdownOpen && (
+            <div className="absolute z-10 mt-2 w-72 max-w-[80vw] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-lg p-2">
+              <label className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer">
+                <input
+                  type="radio"
+                  name="truck-filter"
+                  checked={selectedTruckId === null}
+                  onChange={() => selectTruck(null)}
+                />
+                <span className="text-sm text-[var(--color-text)]">All Trucks</span>
+              </label>
+              <div className="my-2 h-px bg-[var(--color-border)]" />
+              <div className="max-h-64 overflow-auto pr-1">
+                {trucks.map((t) => {
+                  const label = truckLabel(t);
+                  return (
+                    <label
+                      key={t.id}
+                      className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="truck-filter"
+                        checked={selectedTruckId === t.id}
+                        onChange={() => selectTruck(t.id)}
+                      />
+                      <span
+                        className="text-sm text-[var(--color-text)] truncate"
+                        title={label}
+                      >
+                        {label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-3 pr-[150px]">
           <DateTimePicker
             value={startDate}
             onChange={setStartDate}
